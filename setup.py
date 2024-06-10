@@ -10,26 +10,26 @@ with open("README.md", "r", encoding="utf-8") as f:
     long_description: str = f.read()
 
 
-with open("photolingo/requirements.txt", "r", encoding="utf-8") as f:
+with open("linguaphoto/requirements.txt", "r", encoding="utf-8") as f:
     requirements: list[str] = f.read().splitlines()
 
 
-with open("photolingo/requirements-dev.txt", "r", encoding="utf-8") as f:
+with open("linguaphoto/requirements-dev.txt", "r", encoding="utf-8") as f:
     requirements_dev: list[str] = f.read().splitlines()
 
 
-with open("photolingo/__init__.py", "r", encoding="utf-8") as fh:
+with open("linguaphoto/__init__.py", "r", encoding="utf-8") as fh:
     version_re = re.search(r"^__version__ = \"([^\"]*)\"", fh.read(), re.MULTILINE)
-assert version_re is not None, "Could not find version in photolingo/__init__.py"
+assert version_re is not None, "Could not find version in linguaphoto/__init__.py"
 version: str = version_re.group(1)
 
 
 setup(
-    name="photolingo",
+    name="linguaphoto",
     version=version,
-    description="The photolingo project",
+    description="The linguaphoto project",
     author="Benjamin Bolte",
-    url="https://github.com/kscalelabs/photolingo",
+    url="https://github.com/kscalelabs/linguaphoto",
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires=">=3.11",

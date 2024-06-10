@@ -14,7 +14,7 @@ const TopNavbar = () => {
       <Navbar className="bg-body-tertiary justify-content-between" expand="lg">
         <Container>
           <Navbar.Brand as={Link} to="/">
-            PhotoLingo
+            LinguaPhoto
           </Navbar.Brand>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">

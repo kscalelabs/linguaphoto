@@ -1,1 +1,1 @@
-# photolingo
+# LinguaPhoto

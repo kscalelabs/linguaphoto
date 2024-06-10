@@ -5,8 +5,8 @@ import asyncio
 from fastapi.testclient import TestClient
 from pytest_mock.plugin import MockType
 
-from photolingo.db import create_tables
-from photolingo.utils.email import OneTimePassPayload
+from linguaphoto.db import create_tables
+from linguaphoto.utils.email import OneTimePassPayload
 
 
 def test_user_auth_functions(app_client: TestClient, mock_send_email: MockType) -> None:

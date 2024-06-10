@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PHOTOLINGO_ENVIRONMENT: local
+  LINGUAPHOTO_ENVIRONMENT: local
   JWT_SECRET: test
   AWS_ACCESS_KEY_ID: test
   AWS_SECRET_ACCESS_KEY: test

@@ -11,7 +11,7 @@ const Home = () => {
     >
       <Row className="align-items-center">
         <Col lg={4} md={8} sm={12}>
-          <h1 className="display-4">PhotoLingo</h1>
+          <h1 className="display-4">LinguaPhoto</h1>
           <p className="lead">Visual language learning for everyone!</p>
           <Row className="mt-3">
             <GoogleAuthComponent />
