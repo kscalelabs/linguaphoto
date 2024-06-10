@@ -1,2 +1,23 @@
 # requirements.txt
 
+# Standard dependencies.
+omegaconf
+bson
+pydantic
+
+# AWS dependencies.
+aioboto3
+redis
+
+# FastAPI dependencies.
+aiohttp
+aiosmtplib
+fastapi
+pyjwt
+python-multipart
+
+# Deployment dependencies.
+uvicorn[standard]
+
+# Types
+types-aioboto3[dynamodb]
