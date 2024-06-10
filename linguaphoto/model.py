@@ -9,7 +9,7 @@ import uuid
 
 from pydantic import BaseModel
 
-from store.app.crypto import hash_api_key
+from linguaphoto.crypto import hash_api_key
 
 
 class User(BaseModel):

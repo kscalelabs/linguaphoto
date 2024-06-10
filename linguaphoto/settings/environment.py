@@ -7,8 +7,8 @@ from omegaconf import II, MISSING
 
 @dataclass
 class RedisSettings:
-    host: str = field(default=II("oc.env:PHOTOLINGO_REDIS_HOST"))
-    password: str = field(default=II("oc.env:PHOTOLINGO_REDIS_PASSWORD"))
+    host: str = field(default=II("oc.env:LINGUAPHOTO_REDIS_HOST"))
+    password: str = field(default=II("oc.env:LINGUAPHOTO_REDIS_PASSWORD"))
     port: int = field(default=6379)
     db: int = field(default=0)
 

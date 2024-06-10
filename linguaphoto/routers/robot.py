@@ -5,10 +5,10 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from photolingo.crypto import get_new_user_id
-from photolingo.db import Crud
-from photolingo.model import Robot
-from photolingo.routers.users import ApiKeyData, get_api_key
+from linguaphoto.crypto import get_new_user_id
+from linguaphoto.db import Crud
+from linguaphoto.model import Robot
+from linguaphoto.routers.users import ApiKeyData, get_api_key
 
 robots_router = APIRouter()
 

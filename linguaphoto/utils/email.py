@@ -11,8 +11,8 @@ from email.mime.text import MIMEText
 
 import aiosmtplib
 
-from photolingo.crypto import decode_jwt, encode_jwt
-from photolingo.settings import settings
+from linguaphoto.crypto import decode_jwt, encode_jwt
+from linguaphoto.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -97,5 +97,5 @@ def test_email_adhoc() -> None:
 
 
 if __name__ == "__main__":
-    # python -m store.app.utils.email
+    # python -m linguaphoto.utils.email
     test_email_adhoc()

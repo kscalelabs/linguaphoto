@@ -2,8 +2,8 @@
 
 import logging
 
-from photolingo.crud.base import BaseCrud
-from photolingo.model import Part, Robot
+from linguaphoto.crud.base import BaseCrud
+from linguaphoto.model import Part, Robot
 
 logger = logging.getLogger(__name__)
 

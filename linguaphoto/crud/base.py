@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 from redis.asyncio import Redis
 from types_aiobotocore_dynamodb.service_resource import DynamoDBServiceResource
 
-from photolingo.settings import settings
+from linguaphoto.settings import settings
 
 logger = logging.getLogger(__name__)
 

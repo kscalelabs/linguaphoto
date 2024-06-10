@@ -10,10 +10,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security.utils import get_authorization_scheme_param
 from pydantic.main import BaseModel
 
-from photolingo.crypto import get_new_api_key, get_new_user_id
-from photolingo.db import Crud
-from photolingo.model import User
-from photolingo.utils.email import OneTimePassPayload, send_delete_email, send_otp_email
+from linguaphoto.crypto import get_new_api_key, get_new_user_id
+from linguaphoto.db import Crud
+from linguaphoto.model import User
+from linguaphoto.utils.email import OneTimePassPayload, send_delete_email, send_otp_email
 
 logger = logging.getLogger(__name__)
 

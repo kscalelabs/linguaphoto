@@ -7,7 +7,7 @@ from typing import Any, Callable, Generic, TypeVar, cast
 from dotenv import load_dotenv
 from omegaconf import OmegaConf
 
-from photolingo.settings.environment import EnvironmentSettings
+from linguaphoto.settings.environment import EnvironmentSettings
 
 T = TypeVar("T")
 
@@ -19,9 +19,9 @@ def _check_exists(path: Path) -> Path:
 
 
 def _load_environment_settings() -> EnvironmentSettings:
-    if "PHOTOLINGO_ENVIRONMENT_SECRETS" in os.environ:
-        load_dotenv(os.environ["PHOTOLINGO_ENVIRONMENT_SECRETS"])
-    environment = os.environ["PHOTOLINGO_ENVIRONMENT"]
+    if "LINGUAPHOTO_ENVIRONMENT_SECRETS" in os.environ:
+        load_dotenv(os.environ["LINGUAPHOTO_ENVIRONMENT_SECRETS"])
+    environment = os.environ["LINGUAPHOTO_ENVIRONMENT"]
     base_dir = (Path(__file__).parent / "configs").resolve()
     config_path = _check_exists(base_dir / f"{environment}.yaml")
     config = OmegaConf.load(config_path)

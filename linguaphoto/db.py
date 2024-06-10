@@ -4,9 +4,9 @@ import asyncio
 import logging
 from typing import AsyncGenerator, Self
 
-from store.app.crud.base import BaseCrud
-from store.app.crud.robots import RobotCrud
-from store.app.crud.users import UserCrud
+from linguaphoto.crud.base import BaseCrud
+from linguaphoto.crud.robots import RobotCrud
+from linguaphoto.crud.users import UserCrud
 
 
 class Crud(
@@ -44,28 +44,8 @@ async def create_tables(crud: Crud | None = None) -> None:
                 ("emailIndex", "email", "S", "HASH"),
             ],
         )
-        await crud._create_dynamodb_table(
-            name="Robots",
-            keys=[
-                ("robot_id", "S", "HASH"),
-            ],
-            gsis=[
-                ("ownerIndex", "owner", "S", "HASH"),
-                ("nameIndex", "name", "S", "HASH"),
-            ],
-        )
-        await crud._create_dynamodb_table(
-            name="Parts",
-            keys=[
-                ("part_id", "S", "HASH"),
-            ],
-            gsis=[
-                ("ownerIndex", "owner", "S", "HASH"),
-                ("nameIndex", "name", "S", "HASH"),
-            ],
-        )
 
 
 if __name__ == "__main__":
-    # python -m store.app.db
+    # python -m linguaphoto.db
     asyncio.run(create_tables())

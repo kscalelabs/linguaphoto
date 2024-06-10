@@ -4,10 +4,10 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from store.app.routers.part import parts_router
-from store.app.routers.robot import robots_router
-from store.app.routers.users import users_router
-from store.settings import settings
+from linguaphoto.routers.part import parts_router
+from linguaphoto.routers.robot import robots_router
+from linguaphoto.routers.users import users_router
+from linguaphoto.settings import settings
 
 app = FastAPI()
 

@@ -33,6 +33,7 @@ const GoogleAuthComponentInner = () => {
           addAlert(humanReadableError(error), "error");
         } finally {
           setCredential(null);
+          setDisableButton(false);
         }
       }
     })();
@@ -41,10 +42,10 @@ const GoogleAuthComponentInner = () => {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       const returnedCredential = tokenResponse.access_token;
-      if (returnedCredential === undefined) {
-        addAlert("Failed to login using Google OAuth.", "error");
-      } else {
+      if (returnedCredential) {
         setCredential(returnedCredential);
+      } else {
+        addAlert("Failed to login using Google OAuth.", "error");
       }
     },
     onError: () => {

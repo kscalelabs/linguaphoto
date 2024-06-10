@@ -6,9 +6,9 @@ import warnings
 
 from boto3.dynamodb.conditions import Key as KeyCondition
 
-from photolingo.crud.base import BaseCrud
-from photolingo.crypto import hash_api_key
-from photolingo.model import ApiKey, User
+from linguaphoto.crud.base import BaseCrud
+from linguaphoto.crypto import hash_api_key
+from linguaphoto.model import ApiKey, User
 
 
 class UserCrud(BaseCrud):
@@ -71,5 +71,5 @@ async def test_adhoc() -> None:
 
 
 if __name__ == "__main__":
-    # python -m store.app.crud.users
+    # python -m linguaphoto.crud.users
     asyncio.run(test_adhoc())
