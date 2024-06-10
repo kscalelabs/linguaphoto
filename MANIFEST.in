@@ -1,0 +1,1 @@
+recursive-include photolingo/ *.py *.txt py.typed MANIFEST.in
