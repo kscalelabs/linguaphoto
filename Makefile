@@ -1,12 +1,12 @@
 # Makefile
 
 define HELP_MESSAGE
-photolingo
+store
 
 # Installing
 
-1. Create a new Conda environment: `conda create --name photolingo python=3.11`
-2. Activate the environment: `conda activate photolingo`
+1. Create a new Conda environment: `conda create --name store python=3.11`
+2. Activate the environment: `conda activate store`
 3. Install the package: `make install-dev`
 
 # Running Tests
@@ -23,55 +23,63 @@ all:
 .PHONY: all
 
 # ------------------------ #
-#          Build           #
+#          Serve           #
 # ------------------------ #
 
-install:
-	@pip install --verbose -e .
-.PHONY: install
+start-fastapi:
+	@fastapi dev 'store/app/main.py' --port 8080
 
-install-dev:
-	@pip install --verbose -e '.[dev]'
-.PHONY: install
+start-frontend:
+	@cd frontend && npm start
 
-build-ext:
-	@python setup.py build_ext --inplace
-.PHONY: build-ext
+start-docker:
+	@docker kill store-db || true
+	@docker rm store-db || true
+	@docker run --name store-db -d -p 8000:8000 amazon/dynamodb-local
 
-clean:
-	rm -rf build dist *.so **/*.so **/*.pyi **/*.pyc **/*.pyd **/*.pyo **/__pycache__ *.egg-info .eggs/ .ruff_cache/
-.PHONY: clean
+# ------------------------ #
+#      Code Formatting     #
+# ------------------------ #
+
+format-backend:
+	@black store
+	@ruff format store
+.PHONY: format
+
+format-frontend:
+	@cd frontend && npm run format
+.PHONY: format
+
+format: format-backend format-frontend
+.PHONY: format
 
 # ------------------------ #
 #       Static Checks      #
 # ------------------------ #
 
-py-files := $(shell find . -name '*.py')
-
-format:
-	@black $(py-files)
-	@ruff format $(py-files)
-.PHONY: format
-
-format-cpp:
-	@clang-format -i $(shell find . -name '*.cpp' -o -name '*.h')
-	@cmake-format -i $(shell find . -name 'CMakeLists.txt' -o -name '*.cmake')
-.PHONY: format-cpp
-
-static-checks:
-	@black --diff --check $(py-files)
-	@ruff check $(py-files)
-	@mypy --install-types --non-interactive $(py-files)
+static-checks-backend:
+	@black --diff --check store
+	@ruff check store
+	@mypy --install-types --non-interactive store
 .PHONY: lint
 
-mypy-daemon:
-	@dmypy run -- $(py-files)
-.PHONY: mypy-daemon
+static-checks-frontend:
+	@cd frontend && npm run lint
+.PHONY: lint
+
+static-checks: static-checks-backend static-checks-frontend
+.PHONY: lint
 
 # ------------------------ #
 #        Unit tests        #
 # ------------------------ #
 
-test:
-	python -m pytest
+test-backend:
+	@python -m pytest
+
+test-frontend:
+	@cd frontend && npm run test -- --watchAll=false
+
+test: test-backend test-frontend
+
 .PHONY: test

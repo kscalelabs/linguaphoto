@@ -1,0 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap");
+
+body {
+  font-family: "Noto Serif SC", serif; /* Use Noto Serif Simplified Chinese font */
+}
+
+div.content {
+  margin-top: 16px;
+  margin-bottom: 56px;
+}
+
+@media (max-width: 768px) {
+  div.row-two {
+    gap: 16px;
+  }
+}

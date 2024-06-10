@@ -1,0 +1,42 @@
+"""Defines the bot environment settings."""
+
+from dataclasses import dataclass, field
+
+from omegaconf import II, MISSING
+
+
+@dataclass
+class RedisSettings:
+    host: str = field(default=II("oc.env:PHOTOLINGO_REDIS_HOST"))
+    password: str = field(default=II("oc.env:PHOTOLINGO_REDIS_PASSWORD"))
+    port: int = field(default=6379)
+    db: int = field(default=0)
+
+
+@dataclass
+class CryptoSettings:
+    expire_token_minutes: int = field(default=10)
+    expire_otp_minutes: int = field(default=10)
+    jwt_secret: str = field(default=MISSING)
+    algorithm: str = field(default="HS256")
+
+
+@dataclass
+class UserSettings:
+    authorized_emails: list[str] | None = field(default=None)
+    admin_emails: list[str] = field(default_factory=lambda: [])
+
+
+@dataclass
+class SiteSettings:
+    homepage: str = field(default=MISSING)
+    image_url: str | None = field(default=None)
+
+
+@dataclass
+class EnvironmentSettings:
+    redis: RedisSettings = field(default_factory=RedisSettings)
+    user: UserSettings = field(default_factory=UserSettings)
+    crypto: CryptoSettings = field(default_factory=CryptoSettings)
+    site: SiteSettings = field(default_factory=SiteSettings)
+    debug: bool = field(default=False)

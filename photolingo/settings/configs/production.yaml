@@ -1,0 +1,6 @@
+crypto:
+  jwt_secret: ${oc.env:JWT_SECRET}
+site:
+  homepage: https://photolingo.co
+  image_url: https://media.photolingo.co
+  api: https://api.photolingo.co
