@@ -9,7 +9,7 @@ from _pytest.python import Function
 from fastapi.testclient import TestClient
 from moto.dynamodb import mock_dynamodb
 from moto.server import ThreadedMotoServer
-from pytest_mock.plugin import MockerFixture, MockType
+from pytest_mock.plugin import MockerFixture
 
 os.environ["LINGUAPHOTO_ENVIRONMENT"] = "local"
 
@@ -75,29 +75,3 @@ def app_client() -> Generator[TestClient, None, None]:
 
     with TestClient(app) as app_client:
         yield app_client
-
-
-@pytest.fixture(autouse=True)
-def mock_send_email(mocker: MockerFixture) -> MockType:
-    mock = mocker.patch("linguaphoto.utils.email.send_email")
-    mock.return_value = None
-    return mock
-
-
-@pytest.fixture()
-def authenticated_user(app_client: TestClient) -> tuple[TestClient, str, str]:
-    from linguaphoto.utils.email import OneTimePassPayload
-
-    test_email = "test@example.com"
-
-    # Logs the user in using the OTP.
-    otp = OneTimePassPayload(email=test_email, lifetime=3600)
-    response = app_client.post("/users/otp", json={"payload": otp.encode()})
-    assert response.status_code == 200, response.json()
-
-    # Gets a session token.
-    response = app_client.post("/users/refresh")
-    data = response.json()
-    assert response.status_code == 200, data
-
-    return app_client, test_email, data["token"]

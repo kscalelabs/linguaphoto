@@ -13,7 +13,6 @@ from pydantic.main import BaseModel
 from linguaphoto.crypto import get_new_api_key, get_new_user_id
 from linguaphoto.db import Crud
 from linguaphoto.model import User
-from linguaphoto.utils.email import OneTimePassPayload, send_delete_email, send_otp_email
 
 logger = logging.getLogger(__name__)
 
@@ -64,23 +63,6 @@ def validate_email(email: str) -> str:
     return email
 
 
-@users_router.post("/login")
-async def login_user_endpoint(data: UserSignup) -> bool:
-    """Takes the user email and sends them a one-time login password.
-
-    Args:
-        data: The payload with the user email and the login URL to redirect to
-            when the user logs in.
-
-    Returns:
-        True if the email was sent successfully.
-    """
-    email = validate_email(data.email)
-    payload = OneTimePassPayload(email, lifetime=data.lifetime)
-    await send_otp_email(payload, data.login_url)
-    return True
-
-
 class OneTimePass(BaseModel):
     payload: str
 
@@ -116,24 +98,6 @@ async def get_login_response(email: str, lifetime: int, crud: Crud) -> UserLogin
     await crud.add_api_key(api_key, user_id, lifetime)
 
     return UserLoginResponse(api_key=str(api_key))
-
-
-@users_router.post("/otp", response_model=UserLoginResponse)
-async def otp_endpoint(
-    data: OneTimePass,
-    crud: Annotated[Crud, Depends(Crud.get)],
-) -> UserLoginResponse:
-    """Takes the one-time password and returns an API key.
-
-    Args:
-        data: The one-time password payload.
-        crud: The database CRUD object.
-
-    Returns:
-        The API key if the one-time password is valid.
-    """
-    payload = OneTimePassPayload.decode(data.payload)
-    return await get_login_response(payload.email, payload.lifetime, crud)
 
 
 async def get_google_user_info(token: str) -> dict:
@@ -198,7 +162,6 @@ async def delete_user_endpoint(
     if user_obj is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     await crud.delete_user(user_obj)
-    await send_delete_email(user_obj.email)
     return True
 
 
