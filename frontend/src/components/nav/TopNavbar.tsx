@@ -16,19 +16,17 @@ const TopNavbar = () => {
           <Navbar.Brand as={Link} to="/">
             LinguaPhoto
           </Navbar.Brand>
-          <Navbar.Toggle />
-          <Navbar.Collapse className="justify-content-end">
-            <Nav>
-              <Nav.Link
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? <MoonFill /> : <SunFill />}
-              </Nav.Link>
-              <Nav.Link onClick={() => setShowSidebar(true)}>
-                <GearFill />
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
+
+          <div className="d-flex gap-3">
+            <Nav.Link
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? <MoonFill /> : <SunFill />}
+            </Nav.Link>
+            <Nav.Link onClick={() => setShowSidebar(true)}>
+              <GearFill />
+            </Nav.Link>
+          </div>
         </Container>
       </Navbar>
       <Sidebar show={showSidebar} onHide={() => setShowSidebar(false)} />
