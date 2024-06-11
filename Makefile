@@ -1,12 +1,12 @@
 # Makefile
 
 define HELP_MESSAGE
-store
+linguaphoto
 
 # Installing
 
-1. Create a new Conda environment: `conda create --name store python=3.11`
-2. Activate the environment: `conda activate store`
+1. Create a new Conda environment: `conda create --name linguaphoto python=3.11`
+2. Activate the environment: `conda activate linguaphoto`
 3. Install the package: `make install-dev`
 
 # Running Tests
@@ -27,23 +27,23 @@ all:
 # ------------------------ #
 
 start-fastapi:
-	@fastapi dev 'store/app/main.py' --port 8080
+	@fastapi dev 'linguaphoto/main.py' --port 8080
 
 start-frontend:
 	@cd frontend && npm start
 
 start-docker:
-	@docker kill store-db || true
-	@docker rm store-db || true
-	@docker run --name store-db -d -p 8000:8000 amazon/dynamodb-local
+	@docker kill linguaphoto-db || true
+	@docker rm linguaphoto-db || true
+	@docker run --name linguaphoto-db -d -p 8000:8000 amazon/dynamodb-local
 
 # ------------------------ #
 #      Code Formatting     #
 # ------------------------ #
 
 format-backend:
-	@black store
-	@ruff format store
+	@black linguaphoto
+	@ruff format linguaphoto
 .PHONY: format
 
 format-frontend:
@@ -58,9 +58,9 @@ format: format-backend format-frontend
 # ------------------------ #
 
 static-checks-backend:
-	@black --diff --check store
-	@ruff check store
-	@mypy --install-types --non-interactive store
+	@black --diff --check linguaphoto
+	@ruff check linguaphoto
+	@mypy --install-types --non-interactive linguaphoto
 .PHONY: lint
 
 static-checks-frontend:

@@ -17,3 +17,6 @@ pytest-mock
 pytest-timeout
 pytest-trio
 s3fs
+
+# Types
+types-requests

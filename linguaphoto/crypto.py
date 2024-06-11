@@ -7,7 +7,7 @@ from typing import Any
 
 import jwt
 
-from store.settings import settings
+from linguaphoto.settings import settings
 
 
 def hash_api_key(api_key: uuid.UUID) -> str:
