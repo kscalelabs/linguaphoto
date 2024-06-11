@@ -7,7 +7,7 @@ import logging
 from io import BytesIO
 
 import aiohttp
-from openai import OpenAI
+from openai import AsyncOpenAI
 from PIL import Image
 from pydantic import BaseModel
 
@@ -32,6 +32,11 @@ returning it as a JSON object. For example, this is a valid response:
         }
     ]
 }
+
+Return the sections in the canonical order they appear in the image. For
+example, when reading manga, read from right to left, top to bottom. When
+reading a book, if the text is in columns, read from right to left, top to
+bottom. If the text is in rows, read from left to right, top to bottom.
 """.strip()
 
 
@@ -53,7 +58,7 @@ class TranscriptionResponse(BaseModel):
     transcriptions: list[Transcription]
 
 
-async def transcribe_image(image: Image.Image, client: OpenAI) -> TranscriptionResponse:
+async def transcribe_image(image: Image.Image, client: AsyncOpenAI) -> TranscriptionResponse:
     """Transcribes the image to text.
 
     Args:
@@ -105,7 +110,7 @@ async def run_adhoc_test() -> None:
     args = parser.parse_args()
 
     image = Image.open(args.image)
-    client = OpenAI()
+    client = AsyncOpenAI()
     transcription_response = await transcribe_image(image, client)
 
     with open(args.output, "w") as file:

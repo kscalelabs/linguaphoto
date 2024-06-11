@@ -22,8 +22,7 @@ uvicorn[standard]
 # Types
 types-aioboto3[dynamodb]
 
-# AI dependencies: OpenAI and ElevenLabs.
-elevenlabs
+# AI dependencies
 numpy
 openai
 Pillow

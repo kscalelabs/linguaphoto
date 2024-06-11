@@ -1,34 +1,34 @@
-"""Uses the ElevenLabs API to convert text to speech."""
+"""Uses the OpenAI API to convert text to speech."""
 
 import argparse
 import asyncio
 import logging
 from pathlib import Path
-from typing import AsyncIterator, Literal
+from typing import AsyncIterator
 
-from elevenlabs.client import AsyncElevenLabs
+from openai import AsyncOpenAI
 
 from linguaphoto.ai.transcribe import TranscriptionResponse
 
 logger = logging.getLogger(__name__)
 
 
-async def synthesize_text(
-    text: str,
-    client: AsyncElevenLabs,
-    voice: Literal["Rachel", "Adam"] = "Rachel",
-) -> AsyncIterator[bytes]:
+async def synthesize_text(text: str, client: AsyncOpenAI) -> AsyncIterator[bytes]:
     """Synthesizes the text to speech.
 
     Args:
         text: The text to synthesize.
-        client: The ElevenLabs client.
-        voice: The voice to use.
+        client: The OpenAI client.
 
     Returns:
         The synthesized speech.
     """
-    return await client.generate(text=text, voice=voice, model="eleven_multilingual_v2")
+    response = await client.audio.speech.create(
+        model="tts-1",
+        voice="nova",
+        input=text,
+    )
+    return await response.aiter_bytes()
 
 
 async def run_adhoc_test() -> None:
@@ -42,7 +42,7 @@ async def run_adhoc_test() -> None:
     with open(args.transcription, "r") as file:
         transcription_response = TranscriptionResponse.model_validate_json(file.read())
 
-    client = AsyncElevenLabs()
+    client = AsyncOpenAI()
     (root_dir := Path(args.output)).mkdir(parents=True, exist_ok=True)
     for i, transcription in enumerate(transcription_response.transcriptions):
         text = transcription.text

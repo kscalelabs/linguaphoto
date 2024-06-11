@@ -5,8 +5,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from elevenlabs.client import AsyncElevenLabs
-from openai import OpenAI
+from openai import AsyncOpenAI
 from PIL import Image
 
 from linguaphoto.ai.transcribe import transcribe_image
@@ -27,14 +26,13 @@ async def main() -> None:
 
     # Transcribes the image.
     image = Image.open(args.image)
-    client = OpenAI()
+    client = AsyncOpenAI()
     transcription_response = await transcribe_image(image, client)
     with open(root_dir / "transcription.json", "w") as file:
         file.write(transcription_response.model_dump_json(indent=2))
     logger.info("Transcription saved to %s", args.output)
 
     # Runs TTS on the image text.
-    client = AsyncElevenLabs()
     for i, transcription in enumerate(transcription_response.transcriptions):
         text = transcription.text
         audio_path = root_dir / f"audio_{i}.mp3"
