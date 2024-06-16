@@ -6,27 +6,18 @@ from fastapi.testclient import TestClient
 from pytest_mock.plugin import MockType
 
 from linguaphoto.db import create_tables
-from linguaphoto.utils.email import OneTimePassPayload
 
 
 def test_user_auth_functions(app_client: TestClient, mock_send_email: MockType) -> None:
     asyncio.run(create_tables())
 
-    test_email = "test@example.com"
-    login_url = "/"
+    test_username = "testusername"
+    test_password = "ccccc@#$bhui1324frhnund!!@#$"
 
-    # Sends the one-time password to the test email.
-    response = app_client.post("/users/login", json={"email": test_email, "login_url": login_url, "lifetime": 3600})
+    # Attempts to log in before creating the user.
+    response = app_client.post("/users/login", json={"username": test_username, "password": test_password})
     assert response.status_code == 200, response.json()
     assert mock_send_email.call_count == 1
-
-    # Uses the one-time pass to get an API key. We need to make a new OTP
-    # manually because we can't send emails in unit tests.
-    otp = OneTimePassPayload(email=test_email, lifetime=3600)
-    response = app_client.post("/users/otp", json={"payload": otp.encode()})
-    assert response.status_code == 200, response.json()
-    response_data = response.json()
-    api_key = response_data["api_key"]
 
     # Checks that without the API key we get a 401 response.
     response = app_client.get("/users/me")

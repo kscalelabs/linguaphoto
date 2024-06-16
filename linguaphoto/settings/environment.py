@@ -22,9 +22,15 @@ class CryptoSettings:
 
 
 @dataclass
+class TestUserSettings:
+    email: str = field(default=MISSING)
+    google_token: str = field(default=MISSING)
+
+
+@dataclass
 class UserSettings:
-    authorized_emails: list[str] | None = field(default=None)
-    admin_emails: list[str] = field(default_factory=lambda: [])
+    test_user: TestUserSettings | None = field(default_factory=TestUserSettings)
+    auth_lifetime_seconds: int = field(default=604800)  # 1 week
 
 
 @dataclass
@@ -34,9 +40,16 @@ class SiteSettings:
 
 
 @dataclass
+class AWSSettings:
+    image_bucket_id: str = field(default=MISSING)
+    cloudfront_url: str | None = field(default=None)
+
+
+@dataclass
 class EnvironmentSettings:
     redis: RedisSettings = field(default_factory=RedisSettings)
     user: UserSettings = field(default_factory=UserSettings)
     crypto: CryptoSettings = field(default_factory=CryptoSettings)
     site: SiteSettings = field(default_factory=SiteSettings)
+    aws: AWSSettings = field(default_factory=AWSSettings)
     debug: bool = field(default=False)

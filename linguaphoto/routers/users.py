@@ -13,6 +13,7 @@ from pydantic.main import BaseModel
 from linguaphoto.crypto import get_new_api_key, get_new_user_id
 from linguaphoto.db import Crud
 from linguaphoto.model import User
+from linguaphoto.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,9 @@ async def google_login_endpoint(
     data: GoogleLogin,
     crud: Annotated[Crud, Depends(Crud.get)],
 ) -> UserLoginResponse:
-    """Uses Google OAuth to create an API token that lasts for a week (i.e. 604800 seconds)."""
+    if (test_user := settings.user.test_user) is not None and data.token == test_user.google_token:
+        return await get_login_response(test_user.email, settings.user.auth_lifetime_seconds, crud)
+
     try:
         idinfo = await get_google_user_info(data.token)
         email = idinfo["email"]
@@ -126,7 +129,7 @@ async def google_login_endpoint(
     if idinfo.get("email_verified") is not True:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Google email not verified")
 
-    return await get_login_response(email, 604800, crud)
+    return await get_login_response(email, settings.user.auth_lifetime_seconds, crud)
 
 
 class UserInfoResponse(BaseModel):

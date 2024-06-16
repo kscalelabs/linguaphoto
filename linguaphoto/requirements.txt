@@ -20,7 +20,7 @@ python-multipart
 uvicorn[standard]
 
 # Types
-types-aioboto3[dynamodb]
+types-aioboto3[dynamodb,cloudfront,s3]
 
 # AI dependencies
 numpy

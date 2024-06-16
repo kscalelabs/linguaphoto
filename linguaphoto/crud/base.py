@@ -1,5 +1,6 @@
 """Defines the base CRUD interface."""
 
+import asyncio
 import itertools
 import logging
 from typing import Any, AsyncContextManager, Literal, Self
@@ -7,7 +8,9 @@ from typing import Any, AsyncContextManager, Literal, Self
 import aioboto3
 from botocore.exceptions import ClientError
 from redis.asyncio import Redis
+from types_aiobotocore_cloudfront.client import CloudFrontClient
 from types_aiobotocore_dynamodb.service_resource import DynamoDBServiceResource
+from types_aiobotocore_s3.client import S3Client
 
 from linguaphoto.settings import settings
 
@@ -20,6 +23,8 @@ class BaseCrud(AsyncContextManager["BaseCrud"]):
 
         self.__db: DynamoDBServiceResource | None = None
         self.__kv: Redis | None = None
+        self.__s3: S3Client | None = None
+        self.__cf: CloudFrontClient | None = None
 
     @property
     def db(self) -> DynamoDBServiceResource:
@@ -27,23 +32,75 @@ class BaseCrud(AsyncContextManager["BaseCrud"]):
             raise RuntimeError("Must call __aenter__ first!")
         return self.__db
 
-    async def __aenter__(self) -> Self:
-        session = aioboto3.Session()
-        db = session.resource("dynamodb")
-        db = await db.__aenter__()
-        self.__db = db
+    @property
+    def kv(self) -> Redis:
+        if self.__kv is None:
+            raise RuntimeError("Must call __aenter__ first!")
+        return self.__kv
 
-        self.kv = Redis(
+    @property
+    def s3(self) -> S3Client:
+        if self.__s3 is None:
+            raise RuntimeError("Must call __aenter__ first!")
+        return self.__s3
+
+    @property
+    def cf(self) -> CloudFrontClient:
+        if self.__cf is None:
+            raise RuntimeError("Must call __aenter__ first!")
+        return self.__cf
+
+    async def _init_dynamodb(self, session: aioboto3.Session) -> Self:
+        db = session.resource("dynamodb")
+        await db.__aenter__()
+        self.__db = db
+        return self
+
+    async def _init_cloudfront(self, session: aioboto3.Session) -> Self:
+        cf = session.client("cloudfront")
+        await cf.__aenter__()
+        self.__cf = cf
+        return self
+
+    async def _init_s3(self, session: aioboto3.Session) -> Self:
+        s3 = session.client("s3")
+        await s3.__aenter__()
+        self.__s3 = s3
+        return self
+
+    async def _init_redis(self) -> Self:
+        kv = Redis(
             host=settings.redis.host,
             password=settings.redis.password,
             port=settings.redis.port,
             db=settings.redis.db,
         )
+        await kv.__aenter__()
+        self.__kv = kv
+        return self
+
+    async def __aenter__(self) -> Self:
+        session = aioboto3.Session()
+
+        await asyncio.gather(
+            self._init_dynamodb(session),
+            self._init_cloudfront(session),
+            self._init_s3(session),
+            self._init_redis(),
+        )
+
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:  # noqa: ANN401
-        if self.__db is not None:
-            await self.__db.__aexit__(exc_type, exc_val, exc_tb)
+        await asyncio.gather(
+            self.db.__aexit__(exc_type, exc_val, exc_tb),
+            self.cf.__aexit__(exc_type, exc_val, exc_tb),
+            self.kv.__aexit__(exc_type, exc_val, exc_tb),
+            self.s3.__aexit__(exc_type, exc_val, exc_tb),
+        )
+        self.__db = None
+        self.__kv = None
+        self.__s3 = None
 
     async def _create_dynamodb_table(
         self,
@@ -87,3 +144,17 @@ class BaseCrud(AsyncContextManager["BaseCrud"]):
                 BillingMode="PAY_PER_REQUEST",
             )
             await table.wait_until_exists()
+
+    async def _delete_dynamodb_table(self, name: str) -> None:
+        """Deletes a table in the Dynamo database.
+
+        Args:
+            name: Name of the table.
+        """
+        try:
+            table = await self.db.Table(name)
+            await table.delete()
+            await table.wait_until_not_exists()
+        except ClientError:
+            logger.info("Table %s does not exist", name)
+            return

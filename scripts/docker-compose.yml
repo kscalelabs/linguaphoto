@@ -13,3 +13,8 @@ services:
       - "8001:8001"
     environment:
       - DYNAMO_ENDPOINT=http://dynamodb:8000
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
