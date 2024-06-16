@@ -6,7 +6,6 @@ include = '\.pyi?$'
 
 [tool.pytest.ini_options]
 
-addopts = "-rx -rf -x -q --full-trace"
 testpaths = ["tests"]
 
 markers = [

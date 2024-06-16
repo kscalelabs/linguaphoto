@@ -2,6 +2,7 @@ crypto:
   jwt_secret: fakeJwtSecret
 site:
   homepage: http://127.0.0.1:3000
+aws:
   image_bucket_id: linguaphoto-images
 user:
   test_user:

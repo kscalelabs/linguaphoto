@@ -3,21 +3,20 @@
 import asyncio
 
 from fastapi.testclient import TestClient
-from pytest_mock.plugin import MockType
 
 from linguaphoto.db import create_tables
+from linguaphoto.settings import settings
 
 
-def test_user_auth_functions(app_client: TestClient, mock_send_email: MockType) -> None:
+def test_user_auth_functions(app_client: TestClient) -> None:
     asyncio.run(create_tables())
 
-    test_username = "testusername"
-    test_password = "ccccc@#$bhui1324frhnund!!@#$"
+    assert (test_user := settings.user.test_user) is not None
 
     # Attempts to log in before creating the user.
-    response = app_client.post("/users/login", json={"username": test_username, "password": test_password})
+    response = app_client.post("/users/google", json={"token": test_user.google_token})
     assert response.status_code == 200, response.json()
-    assert mock_send_email.call_count == 1
+    api_key = response.json()["api_key"]
 
     # Checks that without the API key we get a 401 response.
     response = app_client.get("/users/me")
@@ -27,7 +26,7 @@ def test_user_auth_functions(app_client: TestClient, mock_send_email: MockType) 
     # Checks that with the API key we get a 200 response.
     response = app_client.get("/users/me", headers={"Authorization": f"Bearer {api_key}"})
     assert response.status_code == 200, response.json()
-    assert response.json()["email"] == test_email
+    assert response.json()["email"] == test_user.email
 
     # Checks that we can't log the user out without the API key.
     response = app_client.delete("/users/logout")
@@ -44,8 +43,9 @@ def test_user_auth_functions(app_client: TestClient, mock_send_email: MockType) 
     assert response.json()["detail"] == "User not found"
 
     # Log the user back in, getting new API key.
-    response = app_client.post("/users/otp", json={"payload": otp.encode()})
+    response = app_client.post("/users/google", json={"token": test_user.google_token})
     assert response.status_code == 200, response.json()
+    api_key = response.json()["api_key"]
 
     # Delete the user using the new API key.
     response = app_client.delete("/users/me", headers={"Authorization": f"Bearer {api_key}"})

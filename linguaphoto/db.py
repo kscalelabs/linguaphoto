@@ -1,13 +1,16 @@
 """Defines base tools for interacting with the database."""
 
+import argparse
 import asyncio
 import logging
+import uuid
 from typing import AsyncGenerator, Self
 
-import argparse
 from linguaphoto.crud.base import BaseCrud
 from linguaphoto.crud.images import ImagesCrud
 from linguaphoto.crud.users import UserCrud
+from linguaphoto.model import User
+from linguaphoto.settings import settings
 
 
 class Crud(
@@ -45,7 +48,6 @@ async def create_tables(crud: Crud | None = None, deletion_protection: bool = Fa
                 ],
                 gsis=[
                     ("emailIndex", "email", "S", "HASH"),
-                    ("usernameIndex", "username", "S", "HASH"),
                 ],
                 deletion_protection=deletion_protection,
             ),
@@ -54,8 +56,48 @@ async def create_tables(crud: Crud | None = None, deletion_protection: bool = Fa
                 keys=[
                     ("image_id", "S", "HASH"),
                 ],
+                gsis=[
+                    ("userIndex", "user_id", "S", "HASH"),
+                ],
+                deletion_protection=deletion_protection,
             ),
         )
+
+
+async def delete_tables(crud: Crud | None = None) -> None:
+    """Deletes all of the database tables.
+
+    Args:
+        crud: The top-level CRUD class.
+    """
+    logging.basicConfig(level=logging.INFO)
+
+    if crud is None:
+        async with Crud() as crud:
+            await delete_tables(crud)
+
+    else:
+        await asyncio.gather(
+            crud._delete_dynamodb_table("Users"),
+            crud._delete_dynamodb_table("Images"),
+        )
+
+
+async def populate_with_dummy_data(crud: Crud | None = None) -> None:
+    """Populates the database with dummy data.
+
+    Args:
+        crud: The top-level CRUD class.
+    """
+    logging.basicConfig(level=logging.INFO)
+
+    if crud is None:
+        async with Crud() as crud:
+            await populate_with_dummy_data(crud)
+
+    else:
+        assert (test_user := settings.user.test_user) is not None
+        await crud.add_user(user=User(user_id=str(uuid.uuid4()), email=test_user.email))
 
 
 async def main() -> None:
