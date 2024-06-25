@@ -55,6 +55,12 @@ class ImagesCrud(BaseCrud):
             ),
         )
 
+    async def get_image_ids(self, user_id: uuid.UUID, offset: int = 0, limit: int = 10) -> list[uuid.UUID]:
+        # Gets the image IDs from the database.
+        table = await self.db.Table("Images")
+        result = await table.query(IndexName="SOMETHING", Limit=limit)
+        return [uuid.UUID(key) for key in result.keys()]
+
     async def delete_image(self, image_id: uuid.UUID, user_id: uuid.UUID) -> None:
         # Deletes the image from the database.
         table = await self.db.Table("Images")
@@ -64,7 +70,7 @@ class ImagesCrud(BaseCrud):
         key = f"{user_id}/{image_id}.webp"
         await self.s3.delete_object(Bucket=settings.aws.image_bucket_id, Key=key)
 
-    async def get_image_url(self, image_id: uuid.UUID, user_id: uuid.UUID, thumb: bool = False) -> str | None:
+    async def get_image_url(self, image_id: uuid.UUID, user_id: uuid.UUID, thumb: bool = False) -> str:
         key = f"{user_id}/{image_id}/{'thumb' if thumb else 'orig'}.webp"
 
         # If CloudFront is enabled, gets the image URL from CloudFront.

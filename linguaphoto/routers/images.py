@@ -7,6 +7,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 from fastapi.exceptions import HTTPException
+from fastapi.responses import RedirectResponse
 from PIL import Image
 from pydantic.main import BaseModel
 
@@ -69,6 +70,19 @@ async def delete_image(
     if (user_id := await crud.get_user_id_from_api_key(data.api_key)) is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
     await crud.delete_image(image_id, user_id)
+
+
+@images_router.get("/see")
+async def see_image(
+    image_id: uuid.UUID,
+    thumb: Annotated[bool, False],
+    data: Annotated[ApiKeyData, Depends(get_api_key)],
+    crud: Annotated[Crud, Depends(Crud.get)],
+) -> RedirectResponse:
+    if (user_id := await crud.get_user_id_from_api_key(data.api_key)) is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+    image_url = await crud.get_image_url(image_id, user_id, thumb)
+    return RedirectResponse(url=image_url)
 
 
 @images_router.get("/list")
