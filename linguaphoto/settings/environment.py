@@ -46,10 +46,18 @@ class AWSSettings:
 
 
 @dataclass
+class ImageSettings:
+    max_upload_width: int = field(default=4096)
+    max_upload_height: int = field(default=4096)
+    thumbnail_width: int = field(default=256)
+
+
+@dataclass
 class EnvironmentSettings:
     redis: RedisSettings = field(default_factory=RedisSettings)
     user: UserSettings = field(default_factory=UserSettings)
     crypto: CryptoSettings = field(default_factory=CryptoSettings)
     site: SiteSettings = field(default_factory=SiteSettings)
     aws: AWSSettings = field(default_factory=AWSSettings)
+    image: ImageSettings = field(default_factory=ImageSettings)
     debug: bool = field(default=False)

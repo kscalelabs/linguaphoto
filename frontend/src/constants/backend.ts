@@ -26,3 +26,5 @@ export const humanReadableError = (error: any | undefined) => {
   }
   return "An unknown error occurred.";
 };
+
+export const IS_DEV = process.env.REACT_APP_DEV_MODE == "local";

@@ -26,13 +26,13 @@ all:
 #          Serve           #
 # ------------------------ #
 
-start-fastapi:
+start-backend:
 	@fastapi dev 'linguaphoto/main.py' --port 8080
 
 start-frontend:
 	@cd frontend && npm start
 
-start-docker:
+start-db:
 	@docker kill linguaphoto-db || true
 	@docker rm linguaphoto-db || true
 	@docker run --name linguaphoto-db -d -p 8000:8000 amazon/dynamodb-local
