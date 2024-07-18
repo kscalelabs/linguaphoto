@@ -61,6 +61,17 @@ async def create_tables(crud: Crud | None = None, deletion_protection: bool = Fa
                 ],
                 deletion_protection=deletion_protection,
             ),
+            crud._create_dynamodb_table(
+                name="Transcriptions",
+                keys=[
+                    ("transcription_id", "S", "HASH"),
+                ],
+                gsis=[
+                    ("userIndex", "user_id", "S", "HASH"),
+                    ("imagesIndex", "image_id", "S", "HASH"),
+                ],
+                deletion_protection=deletion_protection,
+            ),
         )
 
 

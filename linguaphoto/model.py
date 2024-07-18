@@ -16,13 +16,6 @@ class User(BaseModel):
     user_id: str  # Primary key
     email: str
 
-    @classmethod
-    def from_uuid(cls, user_id: uuid.UUID, email: str) -> "User":
-        return cls(user_id=str(user_id), email=email)
-
-    def to_uuid(self) -> uuid.UUID:
-        return uuid.UUID(self.user_id)
-
 
 class ApiKey(BaseModel):
     """Stored in Redis rather than DynamoDB."""
@@ -37,28 +30,20 @@ class ApiKey(BaseModel):
         return cls(api_key_hash=api_key_hash, user_id=str(user_id), lifetime=lifetime)
 
 
-class Bom(BaseModel):
-    part_id: str
-    quantity: int
-
-
 class Image(BaseModel):
-    caption: str
+    image_id: str  # Primary key
+    user_id: str
     url: str
 
 
-class Robot(BaseModel):
-    robot_id: str  # Primary key
-    owner: str
-    name: str
-    description: str
-    bom: list[Bom]
-    images: list[Image]
+class Transcription(BaseModel):
+    transcript: str
+    pinyin: str
+    translation: str
 
 
-class Part(BaseModel):
-    part_id: str  # Primary key
-    part_name: str
-    owner: str
-    description: str
-    images: list[Image]
+class Transcriptions(BaseModel):
+    transcript_id: str  # Primary key
+    image_id: str
+    user_id: str
+    transcriptions: list[Transcription]
