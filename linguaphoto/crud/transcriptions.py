@@ -1,15 +1,10 @@
 """Defines CRUD interface for transcriptions API."""
 
-import asyncio
 import uuid
-from io import BytesIO
 
 from PIL import Image
 
 from linguaphoto.crud.base import BaseCrud
-from linguaphoto.settings import settings
-
-
 
 
 class ImagesCrud(BaseCrud):
