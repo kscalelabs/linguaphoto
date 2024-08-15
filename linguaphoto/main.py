@@ -4,16 +4,12 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from linguaphoto.routers.images import images_router
-from linguaphoto.routers.users import users_router
-from linguaphoto.settings import settings
-
 app = FastAPI()
 
 # Adds CORS middleware.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.site.homepage],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,5 +24,6 @@ async def value_error_exception_handler(request: Request, exc: ValueError) -> JS
     )
 
 
-app.include_router(users_router, prefix="/users", tags=["users"])
-app.include_router(images_router, prefix="/images", tags=["images"])
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {"message": "Hello, World!"}

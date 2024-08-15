@@ -1,6 +1,0 @@
-crypto:
-  jwt_secret: ${oc.env:JWT_SECRET}
-site:
-  homepage: https://linguaphoto.com
-  image_url: https://media.linguaphoto.com
-  api: https://api.linguaphoto.com
