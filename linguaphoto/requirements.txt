@@ -4,25 +4,29 @@
 omegaconf
 bson
 pydantic
+email-validator
 
 # AWS dependencies.
 aioboto3
-redis
+
+# Crypto dependencies
+argon2-cffi
+pyjwt[asyncio]
+bcrypt
 
 # FastAPI dependencies.
 aiohttp
 aiosmtplib
-fastapi
-pyjwt
+fastapi[standard]
+pillow
 python-multipart
+httpx
 
 # Deployment dependencies.
 uvicorn[standard]
 
-# Types
-types-aioboto3[dynamodb,cloudfront,s3]
+# Processing dependencies.
+numpy-stl
 
-# AI dependencies
-numpy
-openai
-Pillow
+# Types
+types-aioboto3[dynamodb, s3]
