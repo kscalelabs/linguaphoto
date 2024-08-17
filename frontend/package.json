@@ -52,7 +52,7 @@
     "@fortawesome/react-fontawesome": "github:fortawesome/react-fontawesome",
     "@react-oauth/google": "^0.12.1",
     "@types/jest": "^29.5.12",
-    "axios": "^1.7.2",
+    "axios": "^1.7.4",
     "babel-eslint": "*",
     "bootstrap": "^5.3.3",
     "eslint": "^8.0.0",
