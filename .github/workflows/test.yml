@@ -69,8 +69,9 @@ jobs:
       - name: Install Python dependencies
         run: |
           cd linguaphoto  # Navigate to the linguaphoto directory
-          pip install --upgrade --upgrade-strategy eager -e '.[dev]'  # Install Python dependencies
-
+          pip install --upgrade --upgrade-strategy eager -r requirements.txt
+          pip install --upgrade --upgrade-strategy eager -r requirements_dev.txt
+          
       # Step 8: Run static code checks (linters, type checkers, etc.)
       - name: Run static checks
         run: |
