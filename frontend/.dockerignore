@@ -1,5 +1,7 @@
-# .dockerignore
-
-# Only add the build directory to Docker.
-*
-!build/
+node_modules
+build
+dist
+.git
+Dockerfile
+README.md
+.env

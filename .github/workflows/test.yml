@@ -1,5 +1,6 @@
-name: CI Checks (Linting and Tests)
+# GitHub Actions Workflow to test a full-stack project (Node.js frontend and Python backend)
 
+# Trigger workflow on push to master or pull requests targeting master
 on:
   push:
     branches:
@@ -13,101 +14,79 @@ on:
       - synchronize
       - ready_for_review
 
+# Handle concurrency to cancel in-progress runs if a new one starts
 concurrency:
   group: tests-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-  LINGUAPHOTO_ENVIRONMENT: local
-  JWT_SECRET: test
-  AWS_ACCESS_KEY_ID: test
-  AWS_SECRET_ACCESS_KEY: test
-  AWS_ENDPOINT_URL_DYNAMODB: http://localhost:8000
-  AWS_REGION: us-east-1
-
 jobs:
-  backend-tests:
+  run-tests:
+    # Set job timeout to 10 minutes
     timeout-minutes: 10
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Check out the repository
       - name: Check out repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.10.0"
+
+      # Step 3: Restore cache (Node modules and mypy cache)
       - name: Restore cache
         id: restore-cache
         uses: actions/cache/restore@v3
         with:
           path: |
-            ${{ env.pythonLocation }}
             .mypy_cache/
-          key: backend-tests-${{ github.event.pull_request.base.sha || github.sha }}
+            frontend/node_modules/
+          key: tests-${{ github.sha }}-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('linguaphoto/requirements.txt') }}
           restore-keys: |
-            backend-tests-
+            tests-${{ github.sha }}-
+            tests-
 
+      # Step 4: Install Node.js packages
+      - name: Install Node packages
+        working-directory: frontend
+        run: npm install
+
+      # Step 5: Build the frontend
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      # Step 6: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Install Python package
+      # Step 7: Install Python packages (including dev dependencies)
+      - name: Install Python dependencies
         run: |
-          pip install --upgrade --upgrade-strategy eager -e '.[dev]'
+          cd linguaphoto  # Navigate to the linguaphoto directory
+          pip install -r requirements.txt  # Install Python dependencies
 
+      # Step 8: Run static code checks (linters, type checkers, etc.)
       - name: Run static checks
         run: |
           mkdir -p .mypy_cache
           make static-checks
 
+      # Step 9: Run unit tests for the backend
       - name: Run unit tests
-        run: |
-          make test-backend
+        run: make test-backend
 
+      # Step 10: Save cache (only on the master branch)
       - name: Save cache
         uses: actions/cache/save@v3
         if: github.ref == 'refs/heads/master'
         with:
           path: |
-            ${{ env.pythonLocation }}
             .mypy_cache/
-          key: ${{ steps.restore-cache.outputs.cache-primary-key }}
-
-  frontend-tests:
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-
-      - name: Restore cache
-        id: restore-cache
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            node_modules/
-          key: frontend-tests-${{ github.event.pull_request.base.sha || github.sha }}
-          restore-keys: |
-            frontend-tests-
-
-      - name: Install Node package
-        working-directory: frontend
-        run: |
-          npm install
-
-      - name: Run tests
-        run: |
-          make test-frontend
-
-      - name: Save cache
-        uses: actions/cache/save@v3
-        if: github.ref == 'refs/heads/master'
-        with:
-          path: |
-            node_modules/
-          key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+            frontend/node_modules/
+          key: tests-${{ github.sha }}-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('linguaphoto/requirements.txt') }}

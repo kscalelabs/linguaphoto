@@ -14,7 +14,7 @@ const Home = () => {
           <h1 className="display-4">LinguaPhoto</h1>
           <p className="lead">Visual language learning for everyone!</p>
           <Row className="mt-3">
-            <GoogleAuthComponent />
+            {/* <GoogleAuthComponent /> */}
           </Row>
         </Col>
         <Col lg={8} md={8} sm={12}>
