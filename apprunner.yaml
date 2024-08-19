@@ -1,16 +1,13 @@
 version: 1.0
 
-runtime: python3  # Specify the runtime, assuming the main runtime is Python
+runtime: python3.11  # Specify the runtime as Python 3.11
 
 build:
   commands:
-    - cd frontend
-    - npm install
-    - npm run build
     - cd ../linguaphoto
+    - pip install --upgrade pip  # Ensure pip is up to date
     - pip install -r requirements.txt
 
 run:
   command: |
-    cd frontend && npx serve -s build -l 3000 &  # Serve frontend on port 3000
     cd ../linguaphoto && uvicorn main:app --host 0.0.0.0 --port 8080  # Run backend server on port 8080
