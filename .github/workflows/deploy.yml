@@ -42,7 +42,7 @@ jobs:
         aws apprunner update-service \
           --service-arn $SERVICE_ARN \
           --source-configuration "{
-            \"SourceCodeRepository\": {
+            \"CodeRepository\": {
               \"RepositoryUrl\": \"${{ secrets.REPOSITORY_URL }}\",
               \"SourceCodeVersion\": {
                 \"Type\": \"BRANCH\",
