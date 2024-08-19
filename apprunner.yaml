@@ -12,5 +12,5 @@ build:
 
 run:
   command: |
-    cd frontend && npx serve -s build -l 8080 &  # Serve frontend on port 8080
-    cd ../linguaphoto && fastapi run --port 8080           # Run backend server
+    cd frontend && npx serve -s build -l 3000 &  # Serve frontend on port 3000
+    cd ../linguaphoto && uvicorn app:app --host 0.0.0.0 --port 8080  # Run backend server on port 8080
