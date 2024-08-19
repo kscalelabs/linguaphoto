@@ -1,13 +1,14 @@
 version: 1.0
-
-runtime: python3.11  # Specify the runtime as Python 3.11
-
+runtime: python311
 build:
   commands:
-    - cd linguaphoto
-    - pip install --upgrade pip  # Ensure pip is up to date
-    - pip install -r requirements.txt
-
+    build:
+      - echo "Build command..."
 run:
-  command: |
-    cd linguaphoto && uvicorn main:app --host 0.0.0.0 --port 8080  # Run backend server on port 8080
+  pre-run:
+    - echo "Installing depecincies..."
+    - cd linguaphoto
+    - pip install -r requirements.txt
+  command: 
+    cd linguaphoto && uvicorn main:app --host 0.0.0.0 --port 8080
+  network: 8080
