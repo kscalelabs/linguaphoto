@@ -1,14 +1,13 @@
 """Pytest configuration file."""
 
 import os
-from typing import Generator
+from typing import Generator, Optional
 
 import fakeredis
 import pytest
 from _pytest.python import Function
 from fastapi.testclient import TestClient
-from moto.dynamodb import mock_dynamodb
-from moto.server import ThreadedMotoServer
+from moto import mock_dynamodb  # Updated import
 from pytest_mock.plugin import MockerFixture
 
 os.environ["LINGUAPHOTO_ENVIRONMENT"] = "local"
@@ -20,43 +19,31 @@ def pytest_collection_modifyitems(items: list[Function]) -> None:
 
 @pytest.fixture(autouse=True)
 def mock_aws() -> Generator[None, None, None]:
-    server: ThreadedMotoServer | None = None
+    env_vars = {}
+    for k in (
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_ENDPOINT_URL_DYNAMODB",
+        "AWS_REGION",
+        "AWS_DEFAULT_REGION",
+    ):
+        if k in os.environ:
+            env_vars[k] = os.environ[k]
+            del os.environ[k]
 
-    try:
-        env_vars: dict[str, str] = {}
-        for k in (
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "AWS_ENDPOINT_URL_DYNAMODB",
-            "AWS_REGION",
-            "AWS_DEFAULT_REGION",
-        ):
-            if k in os.environ:
-                env_vars[k] = os.environ[k]
-                del os.environ[k]
+    os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
+    os.environ["AWS_REGION"] = "us-east-1"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
-        os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
-        os.environ["AWS_ACCESS_KEY_ID"] = "test"
-        os.environ["AWS_DEFAULT_REGION"] = os.environ["AWS_REGION"] = "us-east-1"
+    # Using the updated mock_dynamodb fixture from moto
+    with mock_dynamodb():
+        yield
 
-        # Starts a local AWS server.
-        server = ThreadedMotoServer(port=0)
-        server.start()
-        port = server._server.socket.getsockname()[1]
-        os.environ["AWS_ENDPOINT_URL_DYNAMODB"] = f"http://127.0.0.1:{port}"
-
-        with mock_dynamodb():
-            yield
-
-    finally:
-        if server is not None:
-            server.stop()
-
-        for k, v in env_vars.items():
-            if v is None:
-                os.unsetenv(k)
-            else:
-                os.environ[k] = v
+    # Restore original environment variables
+    for k, v in env_vars.items():
+        if v is not None:
+            os.environ[k] = v
 
 
 @pytest.fixture(autouse=True)
@@ -65,8 +52,9 @@ def mock_redis(mocker: MockerFixture) -> None:
     os.environ["LINGUAPHOTO_REDIS_PASSWORD"] = ""
     os.environ["LINGUAPHOTO_REDIS_PORT"] = "6379"
     os.environ["LINGUAPHOTO_REDIS_DB"] = "0"
+
     fake_redis = fakeredis.aioredis.FakeRedis()
-    mocker.patch("linguaphoto.crud.base.Redis", return_value=fake_redis)
+    # mocker.patch("linguaphoto.crud.base.Redis", return_value=fake_redis)
 
 
 @pytest.fixture()
