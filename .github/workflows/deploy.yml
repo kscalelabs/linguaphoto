@@ -24,13 +24,29 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key stored as a GitHub secret
         aws-region: ${{ secrets.AWS_REGION }}                        # AWS Region stored as a GitHub secret
 
-    # Step 3: Deploy the combined service to AWS App Runner
+    # Step 3: Get the App Runner service ARN
+    - name: Get Service ARN
+      id: get-service-arn
+      run: |
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME }}'].ServiceArn | [0]" --output text)
+        echo "SERVICE_ARN=$SERVICE_ARN" >> $GITHUB_ENV
+        if [ -z "$SERVICE_ARN" ]; then
+          echo "Service ARN not found. Please check the service name and try again."
+          exit 1
+        fi
+
+    # Step 4: Deploy the combined service to AWS App Runner
     - name: Deploy Fullstack App
       run: |
-        # Get the App Runner service ARN
-        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME }}'].ServiceArn | [0]" --output text)
-        
-        # Deploy the code to the App Runner service
+        echo "Deploying to App Runner service with ARN: $SERVICE_ARN"
         aws apprunner update-service \
           --service-arn $SERVICE_ARN \
-          --source-configuration SourceCodeRepository={"RepositoryUrl": "${{ secrets.REPOSITORY_URL }}", "SourceCodeVersion": {"Type": "BRANCH", "Value": "master"}}
+          --source-configuration "{
+            \"SourceCodeRepository\": {
+              \"RepositoryUrl\": \"${{ secrets.REPOSITORY_URL }}\",
+              \"SourceCodeVersion\": {
+                \"Type\": \"BRANCH\",
+                \"Value\": \"master\"
+              }
+            }
+          }"
