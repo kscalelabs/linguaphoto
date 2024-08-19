@@ -3,12 +3,9 @@ runtime: python311
 build:
   commands:
     build:
-      - echo "Build command..."
+      - cd linguaphoto
+      - pip install --upgrade --upgrade-strategy eager -r requirements.txt
 run:
-  pre-run:
-    - echo "Installing depecincies..."
-    - cd linguaphoto
-    - pip install -r requirements.txt
-  command: 
-    cd linguaphoto && uvicorn main:app --host 0.0.0.0 --port 8080
-  network: 8080
+  command: |
+    cd linguaphoto
+    uvicorn main:app --host 0.0.0.0 --port 8080
