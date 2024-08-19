@@ -1,0 +1,16 @@
+version: 1.0
+
+runtime: python3  # Specify the runtime, assuming the main runtime is Python
+
+build:
+  commands:
+    - cd frontend
+    - npm install
+    - npm run build
+    - cd ../linguaphoto
+    - pip install -r requirements.txt
+
+run:
+  command: |
+    cd frontend && npx serve -s build -l 8080 &  # Serve frontend on port 8080
+    cd ../linguaphoto && fastapi run --port 8080           # Run backend server
