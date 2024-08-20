@@ -1,5 +1,4 @@
 version: 1.0
-name: linguaphoto-backend
 runtime: python3  # Specify the Python runtime version
 
 # Specify the build phase commands
