@@ -5,7 +5,7 @@ runtime: python3  # Specify the Python runtime version
 build:
   commands:
     build:
-      - pip install -r requirements.txt  # Install dependencies within the virtual environment
+      - pip install -r --root-user-action=ignore requirements.txt  # Install dependencies within the virtual environment
 # Specify the start phase command
 run:
   command: venv/bin/python main.py  # Use the virtual environment's Python to run the application
