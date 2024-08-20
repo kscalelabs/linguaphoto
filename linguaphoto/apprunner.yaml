@@ -5,6 +5,8 @@ runtime: python3  # Specify the Python runtime version
 build:
   commands:
     build:
+      - python3 -m venv venv
+      - source venv/bin/activate
       - pip install --user -r requirements.txt  # Install dependencies within the virtual environment
 # Specify the start phase command
 run:
