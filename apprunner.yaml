@@ -3,9 +3,9 @@ runtime: python311
 build:
   commands:
     build:
-      - cd linguaphoto
-      - pip install --upgrade --upgrade-strategy eager -r requirements.txt
+      - cd frontend
+      - npm install
+      - npm run build
 run:
-  command: |
-    cd linguaphoto
-    uvicorn main:app --host 0.0.0.0 --port 8080
+  command:
+    cd frontend && npx serve -s build -l 8080
