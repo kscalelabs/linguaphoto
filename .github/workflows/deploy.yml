@@ -1,18 +1,41 @@
 name: Deploy to AWS App Runner
 
-# Trigger this workflow on any push to the 'master' branch
+# Trigger this workflow on any push to the 'main' branch
 on:
   push:
     branches:
       - master
-      
-concurrency:
-  group: deploy
-  cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Deploy Fullstack App to AWS App Runner
+  # Job for deploying the backend service
+  deploy-backend:
+    name: Deploy Backend to AWS App Runner
+    runs-on: ubuntu-latest  # Run on the latest version of Ubuntu
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3  # GitHub Action to checkout the code
+
+    # Step 2: Set up AWS CLI with necessary credentials
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2  # GitHub Action to configure AWS credentials
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}          # AWS Access Key ID stored as a GitHub secret
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key stored as a GitHub secret
+        aws-region: us-east-1                        # AWS Region stored as a GitHub secret
+
+    # Step 3: Deploy the backend service to AWS App Runner
+    - name: Deploy Backend
+      run: |
+        # AWS CLI command to update the backend service in AWS App Runner
+        aws apprunner update-service \
+          --service-arn $(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text) \
+          --source-configuration SourceCodeRepository={"RepositoryUrl": "${{ secrets.REPOSITORY_URL_BACKEND  }}", "SourceCodeVersion": {"Type": "BRANCH", "Value": "master"}}
+
+  # Job for deploying the frontend service
+  deploy-frontend:
+    name: Deploy Frontend to AWS App Runner
     runs-on: ubuntu-latest  # Run on the latest version of Ubuntu
 
     steps:
@@ -28,29 +51,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key stored as a GitHub secret
         aws-region: ${{ secrets.AWS_REGION }}                        # AWS Region stored as a GitHub secret
 
-    # Step 3: Get the App Runner service ARN
-    - name: Get Service ARN
-      id: get-service-arn
+    # Step 3: Deploy the frontend service to AWS App Runner
+    - name: Deploy Frontend
       run: |
-        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME }}'].ServiceArn | [0]" --output text)
-        echo "SERVICE_ARN=$SERVICE_ARN" >> $GITHUB_ENV
-        if [ -z "$SERVICE_ARN" ]; then
-          echo "Service ARN not found. Please check the service name and try again."
-          exit 1
-        fi
-
-    # Step 4: Deploy the combined service to AWS App Runner
-    - name: Deploy Fullstack App
-      run: |
-        echo "Deploying to App Runner service with ARN: $SERVICE_ARN"
+        # AWS CLI command to update the frontend service in AWS App Runner
         aws apprunner update-service \
-          --service-arn $SERVICE_ARN \
-          --source-configuration "{
-            \"CodeRepository\": {
-              \"RepositoryUrl\": \"${{ secrets.REPOSITORY_URL }}\",
-              \"SourceCodeVersion\": {
-                \"Type\": \"BRANCH\",
-                \"Value\": \"master\"
-              }
-            }
-          }"
+          --service-arn $(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_FRONTEND }}'].ServiceArn | [0]" --output text) \
+          --source-configuration SourceCodeRepository={"RepositoryUrl": "${{ secrets.REPOSITORY_URL_FRONTEND }}", "SourceCodeVersion": {"Type": "BRANCH", "Value": "master"}}
