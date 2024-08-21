@@ -29,12 +29,16 @@ jobs:
     - name: Deploy Backend
       run: |
         # AWS CLI command to update the backend service in AWS App Runner
+        aws apprunner update-service \
+        --service-arn $(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text) \
+        --source-configuration SourceCodeRepository={"RepositoryUrl": "${{ secrets.REPOSITORY_URL  }}", "SourceCodeVersion": {"Type": "BRANCH", "Value": "master"}, "SourceDirectory": "/linguaphoto"}
+        
         SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text)
         aws apprunner update-service \
             --service-arn "$SERVICE_ARN" \
             --source-configuration "$(cat <<EOF
         {
-          "CodeRepository": {
+          "SourceCodeRepository": {
             "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
             "SourceCodeVersion": {
               "Type": "BRANCH",
@@ -45,3 +49,62 @@ jobs:
         }
         EOF
         )"
+  # Job for deploying the frontend service
+  deploy-frontend:
+    name: Deploy Frontend to CloudFront
+    runs-on: ubuntu-latest  # Run on the latest version of Ubuntu
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.10.0"
+      # Step 3: Restore cache (Node modules and mypy cache)
+      - name: Restore cache
+        id: restore-cache
+        uses: actions/cache/restore@v3
+        with:
+          path: 
+            frontend/node_modules/
+          key: deploy-${{ github.sha }}-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('linguaphoto/requirements.txt') }}
+          restore-keys: |
+            deploy-${{ github.sha }}-
+            deploy-
+      # Step 4: Install Node.js packages
+      - name: Install Node packages
+        working-directory: frontend
+        run: npm install
+      
+      # Step 5: Build the frontend
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+      # Step 6: Deploy to S3
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./frontend/build s3://${{ secrets.S3_BUCKET }} --deleted
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+      # Step 7: CloudFront
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID}} --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}          
+      # Step 8: Save cache (only on the master branch)
+      - name: Save cache
+        uses: actions/cache/save@v3
+        if: github.ref == 'refs/heads/master'
+        with:
+          path: 
+            frontend/node_modules/
+          key: deploy-${{ github.sha }}-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('linguaphoto/requirements.txt') }}
