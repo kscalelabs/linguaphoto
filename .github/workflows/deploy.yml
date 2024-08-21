@@ -29,6 +29,19 @@ jobs:
     - name: Deploy Backend
       run: |
         # AWS CLI command to update the backend service in AWS App Runner
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text)
         aws apprunner update-service \
-          --service-arn $(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text) \
-          --source-configuration SourceCodeRepository={"RepositoryUrl": "${{ secrets.REPOSITORY_URL  }}", "SourceCodeVersion": {"Type": "BRANCH", "Value": "master"}, "SourceDirectory": "/linguaphoto"}
+            --service-arn "$SERVICE_ARN" \
+            --source-configuration "$(cat <<EOF
+        {
+          "SourceCodeRepository": {
+            "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
+            "SourceCodeVersion": {
+              "Type": "BRANCH",
+              "Value": "master"
+            },
+            "SourceDirectory": "/linguaphoto"
+          }
+        }
+        EOF
+        )"
