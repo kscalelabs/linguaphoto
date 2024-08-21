@@ -38,7 +38,7 @@ jobs:
             --service-arn "$SERVICE_ARN" \
             --source-configuration "$(cat <<EOF
         {
-          "SourceCodeRepository": {
+          "CodeRepository ": {
             "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
             "SourceCodeVersion": {
               "Type": "BRANCH",
