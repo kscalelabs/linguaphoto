@@ -1,7 +1,7 @@
 """Defines the main entrypoint for the FastAPI app."""
 
-from fastapi import FastAPI, Request, status
 import uvicorn
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -29,6 +29,7 @@ async def value_error_exception_handler(request: Request, exc: ValueError) -> JS
 async def root() -> dict[str, str]:
     return {"message": "Hello, World!"}
 
+
 if __name__ == "__main__":
     print("Starting webserver...")
-    uvicorn.run(app, port=8080, host='0.0.0.0')
+    uvicorn.run(app, port=8080, host="0.0.0.0")

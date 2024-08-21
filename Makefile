@@ -27,7 +27,7 @@ all:
 # ------------------------ #
 
 start-backend:
-	@fastapi dev 'linguaphoto/main.py' --port 8080
+	@python 'linguaphoto/main.py'
 
 start-frontend:
 	@cd frontend && npm start
