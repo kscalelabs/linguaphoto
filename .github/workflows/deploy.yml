@@ -43,7 +43,7 @@ jobs:
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if aws apprunner update-service \
               --service-arn "$SERVICE_ARN" \
-              --source-configuration "$(cat <<EOF
+              --source-configuration "$(cat <<'EOF'
             {
               "CodeRepository": {
                 "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
@@ -118,8 +118,8 @@ jobs:
       # Step 7: Deploy to S3
       - name: Replace S3 bucket contents
         run: |
-          aws s3 rm s3://${{ secrets.S3_BUCKET }} --recursive
-          aws s3 cp frontend/build s3://${{ secrets.S3_BUCKET }} --recursive
+          aws s3 rm s3://${{ secrets.S3_BUCKET }}/build --recursive
+          aws s3 cp frontend/build s3://${{ secrets.S3_BUCKET }}/build --recursive
 
       # Step 8: Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
