@@ -1,6 +1,6 @@
 name: Deploy to AWS App Runner
 
-# Trigger this workflow on any push to the 'main' branch
+# Trigger this workflow on any push to the 'master' branch
 on:
   push:
     branches:
@@ -13,44 +13,49 @@ jobs:
     runs-on: ubuntu-latest  # Run on the latest version of Ubuntu
 
     steps:
-    # Step 1: Checkout the code from the repository
-    - name: Checkout code
-      uses: actions/checkout@v3  # GitHub Action to checkout the code
+      # Step 1: Check out the code from the repository
+      - name: Check out code
+        uses: actions/checkout@v3  # GitHub Action to check out the code
 
-    # Step 2: Set up AWS CLI with necessary credentials
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v2  # GitHub Action to configure AWS credentials
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}          # AWS Access Key ID stored as a GitHub secret
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key stored as a GitHub secret
-        aws-region: us-east-1                        # AWS Region stored as a GitHub secret
+      # Step 2: Set up AWS CLI with necessary credentials
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2  # GitHub Action to configure AWS credentials
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}          # AWS Access Key ID stored as a GitHub secret
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key stored as a GitHub secret
+          aws-region: us-east-1                                        # AWS Region stored as a GitHub secret
 
-    # Step 3: Deploy the backend service to AWS App Runner
-    - name: Deploy Backend
-      run: |
-        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text)
-    
-        if [ -z "$SERVICE_ARN" ]; then
-          echo "Error: Service ARN not found for service name ${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}."
-          exit 1
-        fi
-    
-        # Update the backend service in AWS App Runner
-        aws apprunner update-service \
-          --service-arn "$SERVICE_ARN" \
-          --source-configuration "$(cat <<EOF
-        {
-          "CodeRepository": {
-            "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
-            "SourceCodeVersion": {
-              "Type": "BRANCH",
-              "Value": "master"
-            },
-            "SourceDirectory": "linguaphoto"
+      # Step 3: Deploy the backend service to AWS App Runner with retry logic
+      - name: Deploy Backend
+        run: |
+          SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text)
+      
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "Error: Service ARN not found for service name ${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}."
+            exit 1
+          fi
+      
+          # Set retry logic with adaptive mode and a maximum of 10 attempts
+          export AWS_RETRY_MODE='adaptive'
+          export AWS_MAX_ATTEMPTS=10
+          
+          # Update the backend service in AWS App Runner
+          aws apprunner update-service \
+            --service-arn "$SERVICE_ARN" \
+            --source-configuration "$(cat <<EOF
+          {
+            "CodeRepository": {
+              "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
+              "SourceCodeVersion": {
+                "Type": "BRANCH",
+                "Value": "master"
+              },
+              "SourceDirectory": "linguaphoto"
+            }
           }
-        }
-        EOF
-        )"
+          EOF
+          )"
+
   # Job for deploying the frontend service
   deploy-frontend:
     name: Deploy Frontend to CloudFront
@@ -66,6 +71,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20.10.0"
+
       # Step 3: Restore cache (Node modules and mypy cache)
       - name: Restore cache
         id: restore-cache
@@ -77,6 +83,7 @@ jobs:
           restore-keys: |
             deploy-${{ github.sha }}-
             deploy-
+
       # Step 4: Install Node.js packages
       - name: Install Node packages
         working-directory: frontend
@@ -87,24 +94,26 @@ jobs:
         working-directory: frontend
         run: npm run build
       
+      # Step 6: Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      # Step 6: Deploy to S3
+
+      # Step 7: Deploy to S3
       - name: Replace S3 bucket contents
         run: |
           aws s3 rm s3://${{ secrets.S3_BUCKET }} --recursive
           aws s3 cp frontend/build s3://${{ secrets.S3_BUCKET }} --recursive
 
-      # Step 7: CloudFront
+      # Step 8: Invalidate CloudFront cache
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID}} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 
-      # Step 8: Save cache (only on the master branch)
+      # Step 9: Save cache (only on the master branch)
       - name: Save cache
         uses: actions/cache/save@v3
         if: github.ref == 'refs/heads/master'
