@@ -34,27 +34,40 @@ jobs:
             echo "Error: Service ARN not found for service name ${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}."
             exit 1
           fi
-      
-          # Set retry logic with adaptive mode and a maximum of 10 attempts
-          export AWS_RETRY_MODE='adaptive'
-          export AWS_MAX_ATTEMPTS=10
-          
-          # Update the backend service in AWS App Runner
-          aws apprunner update-service \
-            --service-arn "$SERVICE_ARN" \
-            --source-configuration "$(cat <<EOF
-          {
-            "CodeRepository": {
-              "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
-              "SourceCodeVersion": {
-                "Type": "BRANCH",
-                "Value": "master"
-              },
-              "SourceDirectory": "linguaphoto"
+
+          # Retry logic with exponential backoff
+          RETRY_COUNT=0
+          MAX_RETRIES=15
+          BACKOFF_TIME=5  # Initial backoff time in seconds
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if aws apprunner update-service \
+              --service-arn "$SERVICE_ARN" \
+              --source-configuration "$(cat <<EOF
+            {
+              "CodeRepository": {
+                "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
+                "SourceCodeVersion": {
+                  "Type": "BRANCH",
+                  "Value": "master"
+                },
+                "SourceDirectory": "linguaphoto"
+              }
             }
-          }
-          EOF
-          )"
+            EOF
+            )"; then
+              echo "Service updated successfully."
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Update failed. Attempt $RETRY_COUNT of $MAX_RETRIES. Retrying in $BACKOFF_TIME seconds..."
+              sleep $BACKOFF_TIME
+              BACKOFF_TIME=$((BACKOFF_TIME * 2))  # Exponential backoff
+            fi
+          done
+
+          echo "Failed to update the service after $MAX_RETRIES attempts."
+          exit 1
 
   # Job for deploying the frontend service
   deploy-frontend:
