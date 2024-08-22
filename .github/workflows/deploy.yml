@@ -28,15 +28,17 @@ jobs:
     # Step 3: Deploy the backend service to AWS App Runner
     - name: Deploy Backend
       run: |
-        # AWS CLI command to update the backend service in AWS App Runner
-        aws apprunner update-service \
-        --service-arn $(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text) \
-        --source-configuration SourceCodeRepository={"RepositoryUrl": "${{ secrets.REPOSITORY_URL  }}", "SourceCodeVersion": {"Type": "BRANCH", "Value": "master"}, "SourceDirectory": "/linguaphoto"}
-        
         SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text)
+    
+        if [ -z "$SERVICE_ARN" ]; then
+          echo "Error: Service ARN not found for service name ${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}."
+          exit 1
+        fi
+    
+        # Update the backend service in AWS App Runner
         aws apprunner update-service \
-            --service-arn "$SERVICE_ARN" \
-            --source-configuration "$(cat <<EOF
+          --service-arn "$SERVICE_ARN" \
+          --source-configuration "$(cat <<EOF
         {
           "CodeRepository": {
             "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
@@ -44,10 +46,7 @@ jobs:
               "Type": "BRANCH",
               "Value": "master"
             },
-            "CodeConfiguration": {
-              "ConfigurationSource": "REPOSITORY"
-            },
-            "SourceDirectory": "/linguaphoto"
+            "SourceDirectory": "linguaphoto"
           }
         }
         EOF
