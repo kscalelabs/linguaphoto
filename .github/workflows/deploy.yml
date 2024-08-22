@@ -54,7 +54,6 @@ jobs:
   #             BACKOFF_TIME=$((BACKOFF_TIME * 2))  # Exponential backoff
   #           fi
   #         done
-
   #         echo "Failed to update the service after $MAX_RETRIES attempts."
   #         exit 1
 

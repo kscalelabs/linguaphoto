@@ -27,7 +27,7 @@ async def value_error_exception_handler(request: Request, exc: ValueError) -> JS
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"message": "Hello, World!"}
+    return {"message": "Hello, World!, TEST"}
 
 
 if __name__ == "__main__":
