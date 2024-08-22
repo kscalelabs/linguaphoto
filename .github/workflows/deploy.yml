@@ -41,22 +41,9 @@ jobs:
           BACKOFF_TIME=5  # Initial backoff time in seconds
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            JSON_CONFIG=$(cat <<EOF
-            {
-              "CodeRepository": {
-                "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
-                "SourceCodeVersion": {
-                  "Type": "BRANCH",
-                  "Value": "master"
-                },
-                "SourceDirectory": "linguaphoto"
-              }
-            }
-            EOF
-            )
             if aws apprunner update-service \
               --service-arn "$SERVICE_ARN" \
-              --source-configuration "$JSON_CONFIG"; then
+              --source-configuration "{\"CodeRepository\":{\"RepositoryUrl\":\"${{ secrets.REPOSITORY_URL }}\",\"SourceCodeVersion\":{\"Type\":\"BRANCH\",\"Value\":\"master\"},\"SourceDirectory\":\"linguaphoto\"}"; then
               echo "Service updated successfully."
               exit 0
             else
