@@ -43,7 +43,7 @@ jobs:
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if aws apprunner update-service \
               --service-arn "$SERVICE_ARN" \
-              --source-configuration "$(cat <<'EOF'
+              --source-configuration "$(cat << EOF
             {
               "CodeRepository": {
                 "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
