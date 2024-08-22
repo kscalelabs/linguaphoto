@@ -38,11 +38,14 @@ jobs:
             --service-arn "$SERVICE_ARN" \
             --source-configuration "$(cat <<EOF
         {
-          "CodeRepository ": {
+          "CodeRepository": {
             "RepositoryUrl": "${{ secrets.REPOSITORY_URL }}",
             "SourceCodeVersion": {
               "Type": "BRANCH",
               "Value": "master"
+            },
+            "CodeConfiguration": {
+              "ConfigurationSource": "REPOSITORY"
             },
             "SourceDirectory": "/linguaphoto"
           }
