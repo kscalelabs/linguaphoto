@@ -23,11 +23,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}          # AWS Access Key ID stored as a GitHub secret
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key stored as a GitHub secret
-          aws-region: us-east-1                                        # AWS Region stored as a GitHub secret
+          aws-region: ${{ secrets.AWS_REGION }}                        # AWS Region stored as a GitHub secret
 
       # Step 3: Deploy the backend service to AWS App Runner with retry logic
       - name: Deploy Backend
         run: |
+          # Fetch the Service ARN from AWS App Runner
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ secrets.APP_RUNNER_SERVICE_NAME_BACKEND }}'].ServiceArn | [0]" --output text)
 
           if [ -z "$SERVICE_ARN" ]; then
@@ -40,16 +41,10 @@ jobs:
           MAX_RETRIES=15
           BACKOFF_TIME=5  # Initial backoff time in seconds
 
-          # Construct the JSON source configuration using jq
-          SOURCE_CONFIG=$(jq -n \
-            --arg repoUrl "${{ secrets.REPOSITORY_URL }}" \
-            '{ CodeRepository: { RepositoryUrl: $repoUrl, SourceCodeVersion: { Type: "BRANCH", Value: "master" }, SourceDirectory: "linguaphoto" } }'
-          )
-
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if aws apprunner update-service \
-              --service-arn "$SERVICE_ARN" \
-              --source-configuration "$SOURCE_CONFIG"; then
+              --service-arn $SERVICE_ARN \
+              --source-configuration "CodeRepository={RepositoryUrl=${{ secrets.REPOSITORY_URL }}, SourceCodeVersion={Type=BRANCH, Value=master}, SourceDirectory=linguaphoto"; then
               echo "Service updated successfully."
               exit 0
             else
@@ -59,6 +54,7 @@ jobs:
               BACKOFF_TIME=$((BACKOFF_TIME * 2))  # Exponential backoff
             fi
           done
+
           echo "Failed to update the service after $MAX_RETRIES attempts."
           exit 1
 
@@ -76,15 +72,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20.10.0"
+          node-version: "20.10.0"  # Ensure this matches your project’s Node.js version
 
       # Step 3: Restore cache (Node modules and mypy cache)
       - name: Restore cache
         id: restore-cache
         uses: actions/cache/restore@v3
         with:
-          path: 
-            frontend/node_modules/
+          path: frontend/node_modules/
           key: deploy-${{ github.sha }}-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('linguaphoto/requirements.txt') }}
           restore-keys: |
             deploy-${{ github.sha }}-
@@ -94,12 +89,12 @@ jobs:
       - name: Install Node packages
         working-directory: frontend
         run: npm install
-      
+
       # Step 5: Build the frontend
       - name: Build frontend
         working-directory: frontend
         run: npm run build
-      
+
       # Step 6: Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -124,6 +119,5 @@ jobs:
         uses: actions/cache/save@v3
         if: github.ref == 'refs/heads/master'
         with:
-          path: 
-            frontend/node_modules/
+          path: frontend/node_modules/
           key: deploy-${{ github.sha }}-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('linguaphoto/requirements.txt') }}
