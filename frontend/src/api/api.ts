@@ -14,8 +14,8 @@ export interface Bom {
 }
 
 export interface Image {
-  caption: string;
-  url: string;
+  filename: string;
+  s3_url: string;
 }
 
 export interface Robot {
@@ -32,6 +32,23 @@ export class api {
 
   constructor(api: AxiosInstance) {
     this.api = api;
+  }
+  public async test(): Promise<string> {
+    const response = await this.api.get(`/`);
+    return response.data.message;
+  }
+  public async handleUpload(formData: FormData): Promise<Image> {
+    try {
+      const response = await this.api.post("/upload/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading the file", error);
+      return { s3_url: "", filename: "" };
+    }
   }
   public async getUserById(userId: string | undefined): Promise<string> {
     const response = await this.api.get(`/users/${userId}`);

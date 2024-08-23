@@ -30,3 +30,5 @@ numpy-stl
 
 # Types
 types-aioboto3[dynamodb, s3]
+
+python-dotenv
