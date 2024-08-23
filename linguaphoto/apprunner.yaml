@@ -13,3 +13,15 @@ build:
 # Specify the start phase command
 run:
   command: venv/bin/python3 main.py  # Adjust to the path to your application entry point
+  env:
+    -name: DYNAMODB_TABLE_NAME
+      value: "linguaphoto"
+    -name: S3_BUCKET_NAME
+      value: "linguaphoto"
+    -name: AWS_REGION
+      value: "us-east-1"
+  secrets:
+    -name: AWS_ACCESS_KEY_ID
+      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:AWS_SECRET-Bv7ArD:AWS_ACCESS_KEY_ID::"
+    -name: AWS_SECRET_ACCESS_KEY
+      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:AWS_SECRET-Bv7ArD:AWS_SECRET_ACCESS_KEY::"
