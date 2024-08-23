@@ -6,6 +6,7 @@ import { AuthenticationProvider, OneTimePasswordWrapper } from "hooks/auth";
 import { ThemeProvider } from "hooks/theme";
 import Home from "pages/Home";
 import NotFound from "pages/NotFound";
+import Test from "pages/Test";
 import { Container } from "react-bootstrap";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
@@ -23,6 +24,7 @@ const App = () => {
                 <Container className="content">
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/test" element={<Test />} />
                     <Route path="/404" element={<NotFound />} />
                     <Route path="*" element={<NotFoundRedirect />} />
                   </Routes>
