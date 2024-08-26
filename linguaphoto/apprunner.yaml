@@ -22,6 +22,6 @@ run:
       value: "us-east-1"
   secrets:
     - name: AWS_ACCESS_KEY_ID
-      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:AWS_SECRET-Bv7ArD"
+      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:id::"
     - name: AWS_SECRET_ACCESS_KEY
-      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:AWS_SECRET-Bv7ArD"
+      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:key::"
