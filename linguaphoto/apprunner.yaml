@@ -20,8 +20,4 @@ run:
       value: "linguaphoto"
     - name: AWS_REGION
       value: "us-east-1"
-  secrets:
-    - name: AWS_ACCESS_KEY_ID
-      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:AWS_SECRET-Bv7ArD:AWS_ACCESS_KEY_ID"
-    - name: AWS_SECRET_ACCESS_KEY
-      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:AWS_SECRET-Bv7ArD:AWS_SECRET_ACCESS_KEY"
+
