@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from utils.cloudfront_url_signer import CloudFrontUrlSigner
 
 # Load environment variables from .env file
 load_dotenv()
@@ -27,6 +28,8 @@ app.add_middleware(
 # Retrieve AWS configuration from environment variables
 bucket_name = os.getenv("S3_BUCKET_NAME")
 dynamodb_table_name = os.getenv("DYNAMODB_TABLE_NAME")
+media_hosting_server = os.getenv("MEDIA_HOSTING_SERVER")
+key_pair_id = os.getenv("KEY_PAIR_ID")
 
 
 class ImageMetadata(BaseModel):
@@ -50,6 +53,14 @@ async def upload_image(file: UploadFile = File(...)) -> ImageMetadata:
         if dynamodb_table_name is None:
             raise HTTPException(status_code=500, detail="DynamoDB table name is not set.")
 
+        # Create an instance of CloudFrontUrlSigner
+        private_key_path = os.path.abspath("private_key.pem")
+        cfs = CloudFrontUrlSigner(str(key_pair_id), private_key_path)
+        # Generate a signed URL
+        url = f"{media_hosting_server}/{unique_filename}"
+        custom_policy = cfs.create_custom_policy(url, expire_days=100)
+        s3_url = cfs.generate_presigned_url(url, custom_policy)
+        print(s3_url)
         # Create an S3 client with aioboto3
         async with aioboto3.Session().client(
             "s3",
@@ -59,7 +70,6 @@ async def upload_image(file: UploadFile = File(...)) -> ImageMetadata:
         ) as s3_client:
             # Upload the file to S3
             await s3_client.upload_fileobj(file.file, bucket_name, f"uploads/{unique_filename}")
-            s3_url = f"https://{bucket_name}.s3.amazonaws.com/uploads/{unique_filename}"
 
         # Create a DynamoDB resource with aioboto3
         async with aioboto3.Session().resource(
@@ -75,6 +85,7 @@ async def upload_image(file: UploadFile = File(...)) -> ImageMetadata:
         return ImageMetadata(filename=unique_filename, s3_url=s3_url)
 
     except Exception as e:
+        print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -108,4 +119,8 @@ async def root() -> dict[str, str]:
 
 if __name__ == "__main__":
     print("Starting webserver...")
-    uvicorn.run(app, port=8080, host="0.0.0.0")
+    uvicorn.run(
+        app,  # Replace with the module name and app instance
+        host="0.0.0.0",
+        port=8080,
+    )
