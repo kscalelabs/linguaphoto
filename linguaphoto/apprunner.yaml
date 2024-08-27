@@ -20,6 +20,10 @@ run:
       value: "linguaphoto"
     - name: AWS_REGION
       value: "us-east-1"
+    - name: MEDIA_HOSTING_SERVER
+      value: "https://media.linguaphoto.com"
+    - name: KEY_PAIR_ID
+      value: "K1DH6VMVUTIVWJ"
   secrets:
     - name: AWS_ACCESS_KEY_ID
       value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:id::"
