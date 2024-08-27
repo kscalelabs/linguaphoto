@@ -119,8 +119,4 @@ async def root() -> dict[str, str]:
 
 if __name__ == "__main__":
     print("Starting webserver...")
-    uvicorn.run(
-        app,  # Replace with the module name and app instance
-        host="0.0.0.0",
-        port=8080,
-    )
+    uvicorn.run(app, port=8080, host="0.0.0.0")
