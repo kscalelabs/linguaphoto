@@ -5,7 +5,7 @@ black
 darglint
 mypy
 ruff
-
+isort
 # Testing
 moto[dynamodb]
 fakeredis

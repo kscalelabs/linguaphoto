@@ -4,10 +4,7 @@ import avatar from "assets/avatar.png";
 
 const Home = () => {
   return (
-    <Container
-      className="flex-column pt-5 gap-4 d-flex justify-content-center"
-      style={{ display: "flex", minHeight: "90vh" }}
-    >
+    <Container className="flex-column pt-20 gap-4 d-flex justify-content-center">
       <Row className="align-items-center">
         <Col lg={4} md={8} sm={12}>
           <h1 className="display-4">LinguaPhoto</h1>

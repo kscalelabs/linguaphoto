@@ -1,9 +1,9 @@
-import Sidebar from "components/nav/Sidebar";
 import { useTheme } from "hooks/theme";
 import { useState } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import { GearFill, MoonFill, SunFill } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
 const TopNavbar = () => {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
@@ -11,7 +11,10 @@ const TopNavbar = () => {
 
   return (
     <>
-      <Navbar className="bg-body-tertiary justify-content-between" expand="lg">
+      <Navbar
+        className="fixed w-full top-0 z-50 bg-gray-100 dark:bg-gray-800 justify-content-between"
+        expand="lg"
+      >
         <Container>
           <Navbar.Brand as={Link} to="/">
             LinguaPhoto
@@ -29,7 +32,7 @@ const TopNavbar = () => {
           </div>
         </Container>
       </Navbar>
-      <Sidebar show={showSidebar} onHide={() => setShowSidebar(false)} />
+      <Sidebar show={showSidebar} onClose={() => setShowSidebar(false)} />
     </>
   );
 };

@@ -77,13 +77,9 @@ export const AuthenticationProvider = (props: AuthenticationProviderProps) => {
 
   const logout = useCallback(() => {
     (async () => {
-      try {
-        await api.delete<boolean>("/users/logout");
-        setApiKey(null);
-        navigate("/");
-      } catch (error) {
-        // Do nothing
-      }
+      await api.delete<boolean>("/users/logout");
+      setApiKey(null);
+      navigate("/");
     })();
   }, [navigate]);
 
@@ -137,8 +133,6 @@ export const OneTimePasswordWrapper = ({
           });
           setApiKey(response.data.api_key);
           navigate("/");
-        } catch (error) {
-          // Do nothing
         } finally {
           searchParams.delete("otp");
         }
