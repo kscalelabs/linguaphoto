@@ -15,6 +15,7 @@ pyjwt
 bcrypt
 rsa
 
+
 # FastAPI dependencies.
 aiohttp
 aiosmtplib

@@ -1,0 +1,19 @@
+[MASTER]
+# Python version to use (default: python3). 
+python-version= 3.11.9
+ignore=venv
+[MESSAGES CONTROL]
+# Enable specific messages. Disable all warnings except for W0401 and E1101.
+disable=E0401, E0015
+
+[FORMAT]
+# Maximum number of characters on a single line (default: 100). Increase to 120.
+max-line-length=120
+
+[DESIGN]
+# Maximum number of arguments for functions or methods (default: 5). Increase to 7.
+max-args=7
+
+[IMPORTS]
+# List of modules to ignore for import errors (e.g., 'module_that_does_not_exist').
+ignored-modules=

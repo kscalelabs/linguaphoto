@@ -62,8 +62,8 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
 
   useEffect(() => {
     document.body.setAttribute("data-bs-theme", theme);
-    document.body.classList.toggle("dark-mode", theme === "dark");
-    document.body.classList.toggle("light-mode", theme === "light");
+    document.body.classList.toggle("dark", theme === "dark");
+    document.body.classList.toggle("light", theme === "light");
     document.body.style.backgroundColor = COLORS[theme].backgroundColor;
     document.body.style.color = COLORS[theme].color;
   }, [theme]);
