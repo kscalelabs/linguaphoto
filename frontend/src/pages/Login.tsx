@@ -1,21 +1,20 @@
+import { signin, signup } from "api/auth";
+import { useAuth } from "contexts/AuthContext";
+import { useLoading } from "contexts/LoadingContext";
 import React, { useEffect, useState } from "react";
 import { Google } from "react-bootstrap-icons";
-import { useLoading } from "contexts/LoadingContext";
-import { signup, signin } from "api/auth";
-import { useAuth } from "contexts/AuthContext";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 const LoginPage: React.FC = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setName] = useState("");
-  const {startLoading, stopLoading} = useLoading();
-  const {is_auth, setAuth} = useAuth()
+  const { startLoading, stopLoading } = useLoading();
+  const { is_auth, setAuth } = useAuth();
   const navigate = useNavigate();
-  useEffect(()=>{
-    if(is_auth)
-      navigate('/collections');
-  },[is_auth])
+  useEffect(() => {
+    if (is_auth) navigate("/collections");
+  }, [is_auth]);
   // Toggle between login and signup forms
   const handleSwitch = () => {
     setIsSignup(!isSignup);
@@ -28,14 +27,14 @@ const LoginPage: React.FC = () => {
     if (isSignup) {
       // You can call your API for sign-up
       startLoading();
-      const user = await signup({email, password, username})
-      setAuth(user)
+      const user = await signup({ email, password, username });
+      setAuth(user);
       stopLoading();
     } else {
       // You can call your API for login
       startLoading();
-      const user = await signin({email, password})
-      setAuth(user)
+      const user = await signin({ email, password });
+      setAuth(user);
       stopLoading();
     }
   };

@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Response} from "types/auth";
+import { Response } from "types/auth";
 
 interface AuthContextType {
   is_auth: boolean;
@@ -29,14 +29,13 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-        const fetch_data = async (token: string) => {
-          const response = await read_me(token);
-          console.log(response);
-          if (response) setAuth(response);
-        };
-        fetch_data(token);
-      }
-    else signout();
+      const fetch_data = async (token: string) => {
+        const response = await read_me(token);
+        console.log(response);
+        if (response) setAuth(response);
+      };
+      fetch_data(token);
+    } else signout();
   }, []);
   useEffect(() => {
     if (auth?.token) {

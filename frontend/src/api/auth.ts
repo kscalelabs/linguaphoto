@@ -1,10 +1,6 @@
 // src/api/auth.ts
 import axios from "axios";
-import {
-  SigninData,
-  SignupData,
-  Response,
-} from "types/auth";
+import { Response, SigninData, SignupData } from "types/auth";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || "https://localhost:8080";
 

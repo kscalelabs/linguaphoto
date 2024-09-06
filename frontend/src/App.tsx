@@ -1,12 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import LoadingMask from "components/LoadingMask";
 import TopNavbar from "components/nav/TopNavbar";
 import NotFoundRedirect from "components/NotFoundRedirect";
-import { AlertQueue, AlertQueueProvider } from "hooks/alerts";
-import { AuthenticationProvider, OneTimePasswordWrapper } from "hooks/auth";
-import { ThemeProvider } from "hooks/theme";
-import { LoadingProvider } from "contexts/LoadingContext";
 import { AuthProvider } from "contexts/AuthContext";
-import LoadingMask from "components/LoadingMask";
+import { LoadingProvider } from "contexts/LoadingContext";
+import { AlertQueue, AlertQueueProvider } from "hooks/alerts";
+import { ThemeProvider } from "hooks/theme";
 import CollectionPage from "pages/Collection";
 import Collections from "pages/Collections";
 import Home from "pages/Home";

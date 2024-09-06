@@ -1,35 +1,37 @@
 // src/context/LoadingContext.tsx
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from "react";
 
 interface LoadingContextType {
-    loading: boolean;
-    startLoading: () => void;
-    stopLoading: () => void;
+  loading: boolean;
+  startLoading: () => void;
+  stopLoading: () => void;
 }
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export const useLoading = (): LoadingContextType => {
-    const context = useContext(LoadingContext);
-    if (!context) {
-        throw new Error('useLoading must be used within a LoadingProvider');
-    }
-    return context;
+  const context = useContext(LoadingContext);
+  if (!context) {
+    throw new Error("useLoading must be used within a LoadingProvider");
+  }
+  return context;
 };
 
 interface LoadingProviderProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
-export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
-    const [loading, setLoading] = useState<boolean>(false);
+export const LoadingProvider: React.FC<LoadingProviderProps> = ({
+  children,
+}) => {
+  const [loading, setLoading] = useState<boolean>(false);
 
-    const startLoading = () => setLoading(true);
-    const stopLoading = () => setLoading(false);
+  const startLoading = () => setLoading(true);
+  const stopLoading = () => setLoading(false);
 
-    return (
-        <LoadingContext.Provider value={{ loading, startLoading, stopLoading }}>
-            {children}
-        </LoadingContext.Provider>
-    );
+  return (
+    <LoadingContext.Provider value={{ loading, startLoading, stopLoading }}>
+      {children}
+    </LoadingContext.Provider>
+  );
 };
