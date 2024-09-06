@@ -3,6 +3,7 @@
 from typing import List
 
 from crud.collection import CollectionCrud
+from errors import NotAuthorizedError
 from fastapi import APIRouter, Depends
 from models import Collection
 from schemas.collection import CollectionCreateFragment, CollectionEditFragment
@@ -28,7 +29,19 @@ async def create(
         return new_collection
 
 
-@router.post("/get_collections", response_model=List[Collection])
+@router.get("/get_collection", response_model=Collection)
+async def getcollection(
+    id: str, user_id: str = Depends(get_current_user_id), collection_crud: CollectionCrud = Depends()
+) -> dict | None:
+    async with collection_crud:
+        collection = await collection_crud.get_collection(id)
+        print(collection)
+        if collection.user != user_id:
+            raise NotAuthorizedError
+        return collection
+
+
+@router.get("/get_collections", response_model=List[Collection])
 async def getcollections(
     user_id: str = Depends(get_current_user_id), collection_crud: CollectionCrud = Depends()
 ) -> List[Collection]:
@@ -45,6 +58,8 @@ async def editcollection(
 ) -> None:
     async with collection_crud:
         await collection_crud.edit_collection(
-            collection.id, user_id=user_id, updates={"title": collection.title, "description": collection.description}
+            collection.id,
+            user_id=user_id,
+            updates={"title": collection.title, "description": collection.description, "images": collection.images},
         )
         return

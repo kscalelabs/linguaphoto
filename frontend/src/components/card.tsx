@@ -14,7 +14,7 @@ const CardItem: React.FC<Collection> = (collectionProps) => {
   };
 
   return (
-    <div className="relative m-4 group">
+    <div className="relative m-8 group">
       <div className="relative z-10 w-52 h-72 p-3 bg-rose-100 dark:bg-gray-900 border flex flex-col gap-2 opacity-95">
         <h3 className="text-lg font-bold">{title}</h3>
         <p className="text-sm text-gray-900 dark:text-gray-100">
