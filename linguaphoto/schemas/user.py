@@ -23,7 +23,6 @@ class UserSigninFragment(BaseModel):
 
 
 class UserSigninRespondFragment(BaseModel):
-    id: str
     token: str
     username: str
     email: EmailStr

@@ -98,7 +98,7 @@ class BaseCrud(AsyncContextManager):
 
         # Log the item data before insertion for debugging purposes
         logger.info("Inserting item into DynamoDB: %s", item_data)
-
+        print(condition)
         try:
             await table.put_item(
                 Item=item_data,

@@ -4,6 +4,9 @@ import NotFoundRedirect from "components/NotFoundRedirect";
 import { AlertQueue, AlertQueueProvider } from "hooks/alerts";
 import { AuthenticationProvider, OneTimePasswordWrapper } from "hooks/auth";
 import { ThemeProvider } from "hooks/theme";
+import { LoadingProvider } from "contexts/LoadingContext";
+import { AuthProvider } from "contexts/AuthContext";
+import LoadingMask from "components/LoadingMask";
 import CollectionPage from "pages/Collection";
 import Collections from "pages/Collections";
 import Home from "pages/Home";
@@ -18,10 +21,10 @@ const App = () => {
   return (
     <Router>
       <ThemeProvider>
-        <AuthenticationProvider>
-          <AlertQueueProvider>
-            <AlertQueue>
-              <OneTimePasswordWrapper>
+        <LoadingProvider>
+          <AuthProvider>
+            <AlertQueueProvider>
+              <AlertQueue>
                 <Container>
                   <Routes>
                     <Route path="/" element={<Home />} />
@@ -42,10 +45,11 @@ const App = () => {
                   </Routes>
                 </Container>
                 <TopNavbar />
-              </OneTimePasswordWrapper>
-            </AlertQueue>
-          </AlertQueueProvider>
-        </AuthenticationProvider>
+              </AlertQueue>
+            </AlertQueueProvider>
+          </AuthProvider>
+          <LoadingMask />
+        </LoadingProvider>
       </ThemeProvider>
     </Router>
   );

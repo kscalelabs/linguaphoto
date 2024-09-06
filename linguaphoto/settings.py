@@ -19,7 +19,7 @@ load_dotenv()
 
 class Settings:
     bucket_name = os.getenv("S3_BUCKET_NAME")
-    dynamodb_table_name = os.getenv("DYNAMODB_TABLE_NAME")
+    dynamodb_table_name = os.getenv("DYNAMODB_TABLE_NAME", "linguaphoto")
     media_hosting_server = os.getenv("MEDIA_HOSTING_SERVER")
     key_pair_id = os.getenv("KEY_PAIR_ID")
     aws_region_name = os.getenv("AWS_REGION")

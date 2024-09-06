@@ -7,7 +7,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "contexts/AuthContext";
 import clsx from "clsx";
 
 interface SidebarItemProps {
@@ -70,7 +70,7 @@ interface SidebarProps {
 
 const Sidebar = ({ show, onClose }: SidebarProps) => {
   const navigate = useNavigate();
-
+  const { is_auth, signout } = useAuth();
   return (
     <div>
       {show ? (
@@ -106,7 +106,8 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
                 }}
                 size="md"
               />
-              <SidebarItem
+              {
+                is_auth?<SidebarItem
                 title="Collections"
                 icon={<FaThList />}
                 onClick={() => {
@@ -114,7 +115,7 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
                   onClose();
                 }}
                 size="md"
-              />
+              />:<></>}
               <SidebarItem
                 title="Privacy"
                 icon={<FaLock />}
@@ -130,25 +131,30 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
             <hr className="my-4 border-gray-300 dark:border-gray-600" />
 
             <ul className="space-y-1">
-              <SidebarItem
-                title="Login / Sign Up"
-                icon={<FaSignInAlt />}
-                onClick={() => {
-                  navigate("/login");
-                  onClose();
-                }}
-                size="md"
-              />
-              <SidebarItem
-                title="Logout"
-                icon={<FaSignOutAlt />}
-                onClick={() => {
-                  // Handle logout logic here
-                  navigate("/login");
-                  onClose();
-                }}
-                size="md"
-              />
+              {
+                is_auth ?
+                  <SidebarItem
+                    title="Logout"
+                    icon={<FaSignOutAlt />}
+                    onClick={() => {
+                      // Handle logout logic here
+                      signout();
+                      navigate("/login");
+                      onClose();
+                    }}
+                    size="md"
+                  /> :
+                  <SidebarItem
+                    title="Login / Sign Up"
+                    icon={<FaSignInAlt />}
+                    onClick={() => {
+                      navigate("/login");
+                      onClose();
+                    }}
+                    size="md"
+                  />
+              }
+
             </ul>
           </div>
         </div>
