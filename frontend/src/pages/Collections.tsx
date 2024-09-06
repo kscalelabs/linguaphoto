@@ -1,4 +1,4 @@
-import { api } from "api/API";
+import { api } from "api/api";
 import axios, { AxiosInstance } from "axios";
 import CardItem from "components/card";
 import NewCardItem from "components/new_card";

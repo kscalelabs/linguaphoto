@@ -1,4 +1,4 @@
-import { api } from "api/API";
+import { api } from "api/api";
 import axios, { AxiosInstance } from "axios";
 import ImageComponent from "components/image";
 import { useAuth } from "contexts/AuthContext";
