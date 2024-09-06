@@ -14,8 +14,8 @@ from utils.auth import create_access_token, decode_access_token, oauth2_schema
 router = APIRouter()
 
 
-@router.post("/signup", response_model=UserSigninRespondFragment)
-async def signup(user: UserSignupFragment, user_crud: UserCrud = Depends()) -> dict:
+@router.post("/signup", response_model=UserSigninRespondFragment | None)
+async def signup(user: UserSignupFragment, user_crud: UserCrud = Depends()) -> dict | None:
     """User registration endpoint.
 
     This endpoint allows a new user to sign up by providing the necessary user details.
@@ -23,13 +23,15 @@ async def signup(user: UserSignupFragment, user_crud: UserCrud = Depends()) -> d
     """
     async with user_crud:
         new_user = await user_crud.create_user_from_email(user)
-        token = create_access_token({"id": user.id}, timedelta(hours=24))
-        res_user = UserSigninRespondFragment(id=new_user.id, token=token, username=user.username, email=user.email)
+        if new_user is None:
+            return None
+        token = create_access_token({"id": new_user.id}, timedelta(hours=24))
+        res_user = UserSigninRespondFragment(token=token, username=user.username, email=user.email)
         return res_user.model_dump()
 
 
-@router.post("/signin", response_model=UserSigninRespondFragment)
-async def signin(user: UserSigninFragment, user_crud: UserCrud = Depends()) -> dict:
+@router.post("/signin", response_model=UserSigninRespondFragment | None)
+async def signin(user: UserSigninFragment, user_crud: UserCrud = Depends()) -> dict | None:
     """User login endpoint.
 
     This endpoint allows an existing user to sign in by verifying their credentials.
@@ -46,8 +48,8 @@ async def signin(user: UserSigninFragment, user_crud: UserCrud = Depends()) -> d
             raise HTTPException(status_code=422, detail="Could not validate credentials")
 
 
-@router.get("/me", response_model=UserSigninRespondFragment)
-async def get_me(token: str = Depends(oauth2_schema), user_crud: UserCrud = Depends()) -> dict:
+@router.get("/me", response_model=UserSigninRespondFragment | None)
+async def get_me(token: str = Depends(oauth2_schema), user_crud: UserCrud = Depends()) -> dict | None:
     """Retrieve the currently authenticated user's information.
 
     This endpoint uses the provided token to decode and identify the user.

@@ -8,10 +8,13 @@ from schemas.user import UserSigninFragment, UserSignupFragment
 
 
 class UserCrud(BaseCrud):
-    async def create_user_from_email(self, user: UserSignupFragment) -> User:
-        user = User.create(user)
-        await self._add_item(user, unique_fields=["email"])
-        return user
+    async def create_user_from_email(self, user: UserSignupFragment) -> User | None:
+        duplicated_user = await self._get_items_from_secondary_index("email", user.email, User)
+        if duplicated_user:
+            return None
+        new_user = User.create(user)
+        await self._add_item(new_user, unique_fields=["email"])
+        return new_user
 
     async def get_user(self, id: str, throw_if_missing: bool = False) -> User | None:
         return await self._get_item(id, User, throw_if_missing=throw_if_missing)
