@@ -1,4 +1,4 @@
-import { api } from "api/api";
+import { api } from "api/API";
 import axios, { AxiosInstance } from "axios";
 import { ChangeEvent, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";

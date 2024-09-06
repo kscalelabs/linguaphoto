@@ -1,10 +1,13 @@
+import { api } from "api/API";
+import axios, { AxiosInstance } from "axios";
 import ImageComponent from "components/image";
+import { useAuth } from "contexts/AuthContext";
+import { useLoading } from "contexts/LoadingContext";
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Image } from "types/model";
-
+import { Collection, Image } from "types/model";
 // Truncated mock data
 
 const images: Array<Image> = [
@@ -48,17 +51,34 @@ const CollectionPage: React.FC = () => {
   const [description, setDescription] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentImage, setCurrentImage] = useState<Image | null>(null);
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const { auth, is_auth } = useAuth();
+  const { startLoading, stopLoading } = useLoading();
 
+  const apiClient: AxiosInstance = axios.create({
+    baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
+    timeout: 10000, // Request timeout (in milliseconds)
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
+    },
+  });
+  const API = new api(apiClient);
   // Helper to check if it's an edit action
   const isEditAction = location.search.includes("Action=edit");
 
   // Simulate fetching data for the edit page (mocking API call)
   useEffect(() => {
-    if (id && isEditAction) {
-      setTitle("Sample Collection Title");
-      setDescription("Sample collection description");
+    if (id && is_auth) {
+      startLoading();
+      const asyncfunction = async () => {
+        const collection = await API.getCollection(id);
+        setCollection(collection);
+        stopLoading();
+      };
+      asyncfunction();
     }
-  }, [id, isEditAction]);
+  }, [id, is_auth]);
 
   // Get translated images
   const translatedImages = images.filter((img) => img.is_translated);
@@ -69,6 +89,14 @@ const CollectionPage: React.FC = () => {
     }
   }, [currentImageIndex, translatedImages]);
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    startLoading();
+    const collection = await API.createCollection({ title, description });
+    if (collection != null)
+      navigate(`/collection/${collection.id}?Action=edit`);
+    stopLoading();
+  };
   // Navigate between images
   const handleNext = () => {
     if (currentImageIndex < translatedImages.length - 1) {
@@ -87,6 +115,17 @@ const CollectionPage: React.FC = () => {
     navigate("/collections");
   };
 
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (collection) {
+      const asyncfunction = async () => {
+        startLoading();
+        await API.editCollection(collection);
+        stopLoading();
+      };
+      asyncfunction();
+    }
+  };
   // Custom Return Button (fixed top-left with border)
   const ReturnButton = () => (
     <button
@@ -100,65 +139,83 @@ const CollectionPage: React.FC = () => {
   // Rendering New Collection Page
   if (!id) {
     return (
-      <div className="flex flex-col items-center pt-20 gap-4">
+      <div className="flex flex-col items-center pt-20 gap-8">
         <h1>New Collection</h1>
-        <div className="mt-4">
-          <input
-            className="border p-2 w-80"
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-        <div className="mt-4">
-          <textarea
-            className="border p-2 w-80 h-32"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <div className="mt-4 flex gap-2">
-          <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-            Create
-          </button>
-        </div>
-        <ReturnButton />
-      </div>
-    );
-  }
-
-  // Rendering Edit Collection Page
-  if (id && isEditAction) {
-    return (
-      <div className="flex flex-col items-center pt-20 gap-4">
-        <h1>Edit Collection {id}</h1>
-        <div className="mt-4 w-full">
+        <form
+          className="flex flex-col items-end gap-4 w-96"
+          onSubmit={handleCreate}
+        >
           <input
             className="border p-2 w-full"
             type="text"
             placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            required
           />
-        </div>
-        <div className="mt-4 w-full">
           <textarea
-            className="border p-2 h-32 w-full"
+            className="border p-2 w-full h-32"
             placeholder="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            required
           />
-        </div>
-        <div className="mt-4 flex justify-content-end w-full gap-2">
-          <button className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600">
-            Save Changes
+          <button
+            className="bg-blue-500 w-32 text-white p-2 rounded hover:bg-blue-600"
+            type="submit"
+          >
+            Create
           </button>
-          <button className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600">
-            Images Upload
-          </button>
-        </div>
+        </form>
+        <ReturnButton />
+      </div>
+    );
+  }
+
+  // Rendering Edit Collection Page
+  if (id && isEditAction && collection) {
+    return (
+      <div className="flex flex-col items-center pt-20 gap-4">
+        <h1>Edit Collection </h1>
+        <form
+          className="flex flex-col items-center gap-4 w-full"
+          onSubmit={handleSave}
+        >
+          <div className="mt-4 w-full">
+            <input
+              className="border p-2 w-full"
+              type="text"
+              placeholder="Title"
+              value={collection.title}
+              onChange={(e) =>
+                setCollection({ ...collection, title: e.target.value })
+              }
+              required
+            />
+          </div>
+          <div className="mt-4 w-full">
+            <textarea
+              className="border p-2 h-32 w-full"
+              placeholder="Description"
+              value={collection.description}
+              onChange={(e) =>
+                setCollection({ ...collection, description: e.target.value })
+              }
+              required
+            />
+          </div>
+          <div className="mt-4 flex justify-content-end w-full gap-2">
+            <button
+              className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
+              type="submit"
+            >
+              Save Changes
+            </button>
+            <button className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600">
+              Images Upload
+            </button>
+          </div>
+        </form>
         <Row className="align-items-center w-full">
           {images.map((image) => {
             return (
@@ -174,54 +231,58 @@ const CollectionPage: React.FC = () => {
   }
 
   // Rendering Collection Detail Page
-  return (
-    <div className="flex flex-col items-center pt-20 gap-4">
-      <h1 className="text-lg font-bold mb-4">Collection Details {id}</h1>
-      {currentImage ? (
-        <div className="flex flex-col align-items-center">
-          <img
-            src={currentImage.image_url}
-            alt="Collection Image"
-            className="max-h-96 h-auto mx-auto mb-4"
-          />
-          <p className="mt-2">{currentImage.transcript}</p>
-          <audio controls className="mt-4 w-full">
-            <source src={currentImage.audio_url} type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
+  if (id && !isEditAction && collection) {
+    return (
+      <div className="flex flex-col items-center pt-20 gap-4">
+        <h1 className="text-xl font-bold mb-4">{collection.title}</h1>
+        <p className="text-md mb-4">{collection.description}</p>
+        {currentImage ? (
+          <div className="flex flex-col align-items-center">
+            <img
+              src={currentImage.image_url}
+              alt="Collection Image"
+              className="max-h-96 h-auto mx-auto mb-4"
+            />
+            <p className="mt-2">{currentImage.transcript}</p>
+            <audio controls className="mt-4 w-full">
+              <source src={currentImage.audio_url} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-4 w-40">
-            <button
-              className={`px-3 py-1 rounded ${
-                currentImageIndex === 0
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-gray-500 text-white hover:bg-gray-600"
-              }`}
-              onClick={handlePrev}
-              disabled={currentImageIndex === 0}
-            >
-              Prev
-            </button>
-            <button
-              className={`px-3 py-1 rounded ${
-                currentImageIndex === translatedImages.length - 1
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-gray-500 text-white hover:bg-gray-600"
-              }`}
-              onClick={handleNext}
-              disabled={currentImageIndex === translatedImages.length - 1}
-            >
-              Next
-            </button>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-4 w-40">
+              <button
+                className={`px-3 py-1 rounded ${
+                  currentImageIndex === 0
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
+                }`}
+                onClick={handlePrev}
+                disabled={currentImageIndex === 0}
+              >
+                Prev
+              </button>
+              <button
+                className={`px-3 py-1 rounded ${
+                  currentImageIndex === translatedImages.length - 1
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
+                }`}
+                onClick={handleNext}
+                disabled={currentImageIndex === translatedImages.length - 1}
+              >
+                Next
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div>No translated images available.</div>
-      )}
-      <ReturnButton />
-    </div>
-  );
+        ) : (
+          <div>No translated images available.</div>
+        )}
+        <ReturnButton />
+      </div>
+    );
+  }
+  return <></>;
 };
 
 export default CollectionPage;
