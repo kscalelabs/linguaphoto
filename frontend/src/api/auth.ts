@@ -8,13 +8,17 @@ export const signup = async (data: SignupData): Promise<Response> => {
   const response = await axios.post(`${API_URL}/signup`, data);
   return response.data;
 };
-export const read_me = async (token: string): Promise<Response> => {
-  const response = await axios.get(`${API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
+export const read_me = async (token: string): Promise<Response | null> => {
+  try {
+    const response = await axios.get(`${API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch {
+    return null;
+  }
 };
 export const signin = async (data: SigninData): Promise<Response> => {
   const response = await axios.post(`${API_URL}/signin`, data);

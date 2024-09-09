@@ -1,4 +1,4 @@
-import { api } from "api/api";
+import { Api } from "api/api";
 import axios, { AxiosInstance } from "axios";
 import { ChangeEvent, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -37,7 +37,7 @@ const Home = () => {
       Authorization: "Bearer your_token_here", // Add any default headers you need
     },
   });
-  const API = new api(apiClient);
+  const API = new Api(apiClient);
   const [message, setMessage] = useState("Linguaphoto");
   const [imageURL, setImageURL] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -65,7 +65,7 @@ const Home = () => {
 
     try {
       const response = await API.handleUpload(formData);
-      setImageURL(response.s3_url);
+      if (response) setImageURL(response.image_url);
     } catch (error) {
       console.error("Error uploading the file", error);
     }

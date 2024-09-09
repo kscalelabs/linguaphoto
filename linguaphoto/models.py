@@ -71,6 +71,6 @@ class Image(LinguaBaseModel):
     user: str
 
     @classmethod
-    def create(cls, image_url: str, user_id: str) -> Self:
+    def create(cls, image_url: str, user_id: str, collection_id: str) -> Self:
         """Initializes a new User instance with a unique ID, username, email,and hashed password."""
-        return cls(id=str(uuid4()), image_url=image_url, user=user_id)
+        return cls(id=str(uuid4()), image_url=image_url, user=user_id, collection=collection_id)

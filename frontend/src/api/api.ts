@@ -1,16 +1,11 @@
 import { AxiosInstance } from "axios";
-import { Collection } from "types/model";
-
-export interface Image {
-  filename: string;
-  s3_url: string;
-}
+import { Collection, Image } from "types/model";
 
 export interface CollectionCreateFragment {
   title: string;
   description: string;
 }
-export class api {
+export class Api {
   public api: AxiosInstance;
 
   constructor(api: AxiosInstance) {
@@ -20,7 +15,7 @@ export class api {
     const response = await this.api.get(`/`);
     return response.data.message;
   }
-  public async handleUpload(formData: FormData): Promise<Image> {
+  public async handleUpload(formData: FormData): Promise<Image | null> {
     try {
       const response = await this.api.post("/upload/", formData, {
         headers: {
@@ -30,7 +25,7 @@ export class api {
       return response.data;
     } catch (error) {
       console.error("Error uploading the file", error);
-      return { s3_url: "", filename: "" };
+      return null;
     }
   }
   public async createCollection(
@@ -49,6 +44,19 @@ export class api {
   }
   public async getAllCollections(): Promise<Array<Collection> | null> {
     const response = await this.api.get(`/get_collections`);
+    return response.data;
+  }
+  public async uploadImage(file: File, collection_id: string): Promise<Image> {
+    const response = await this.api.post("/upload", {
+      file,
+      id: collection_id,
+    });
+    return response.data;
+  }
+  public async getImages(collection_id: string): Promise<Array<Image>> {
+    const response = await this.api.get(
+      `/get_images?collection_id=${collection_id}`,
+    );
     return response.data;
   }
 }

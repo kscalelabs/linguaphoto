@@ -1,4 +1,4 @@
-import { api } from "api/api";
+import { Api } from "api/api";
 import axios, { AxiosInstance } from "axios";
 import CardItem from "components/card";
 import NewCardItem from "components/new_card";
@@ -32,7 +32,7 @@ const Collections = () => {
       Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
     },
   });
-  const API = new api(apiClient);
+  const API = new Api(apiClient);
 
   return (
     <div className="flex-column pt-20 gap-4 d-flex justify-content-center">
