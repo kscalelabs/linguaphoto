@@ -30,9 +30,12 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       const fetch_data = async (token: string) => {
-        const response = await read_me(token);
-        console.log(response);
-        if (response) setAuth(response);
+        try {
+          const response = await read_me(token);
+          if (response) setAuth(response);
+        } catch {
+          return;
+        }
       };
       fetch_data(token);
     } else signout();

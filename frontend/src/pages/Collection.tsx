@@ -1,6 +1,8 @@
-import { api } from "api/api";
+import { Api } from "api/api";
 import axios, { AxiosInstance } from "axios";
 import ImageComponent from "components/image";
+import Modal from "components/modal";
+import UploadContent from "components/UploadContent";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import React, { useEffect, useState } from "react";
@@ -8,40 +10,6 @@ import { Col, Row } from "react-bootstrap";
 import { ArrowLeft } from "react-bootstrap-icons";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Collection, Image } from "types/model";
-// Truncated mock data
-
-const images: Array<Image> = [
-  {
-    id: "img1",
-    is_translated: true,
-    collection: "12345",
-    image_url:
-      "https://d1muf25xaso8hp.cloudfront.net/https%3A%2F%2Ff1700c1ec57d7b74b2c6981cad44f0cc.cdn.bubble.io%2Ff1725391119469x565871415375944100%2Fbubble-1725391118796.jpg?w=1536&h=864&auto=compress&dpr=1&fit=max",
-    audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    transcript:
-      "多空布文小一共免村童國好北姊穿找帽員文但。也裏頁文寸圓力發瓜想走息已占，卜話國清品科抄英貓，爬課人孝。來鴨結裏工香今合荷平",
-  },
-  {
-    id: "img2",
-    is_translated: false,
-    collection: "12345",
-    image_url:
-      "https://d1muf25xaso8hp.cloudfront.net/https%3A%2F%2Ff1700c1ec57d7b74b2c6981cad44f0cc.cdn.bubble.io%2Ff1725391122027x185936571789460320%2Fbubble-1725391118802.jpg?w=1536&h=864&auto=compress&dpr=1&fit=max",
-    audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    transcript:
-      "多空布文小一共免村童國好北姊穿找帽員文但。也裏頁文寸圓力發瓜想走息已占，卜話國清品科抄英貓，爬課人孝。來鴨結裏工香今合荷平",
-  },
-  {
-    id: "img3",
-    is_translated: true,
-    collection: "12345",
-    image_url:
-      "https://d1muf25xaso8hp.cloudfront.net/https%3A%2F%2Ff1700c1ec57d7b74b2c6981cad44f0cc.cdn.bubble.io%2Ff1725391122027x185936571789460320%2Fbubble-1725391118802.jpg?w=1536&h=864&auto=compress&dpr=1&fit=max",
-    audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    transcript:
-      "多空布文小一共免村童國好北姊穿找帽員文但。也裏頁文寸圓力發瓜想走息已占，卜話國清品科抄英貓，爬課人孝。來鴨結裏工香今合荷平",
-  },
-];
 
 const CollectionPage: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -54,6 +22,8 @@ const CollectionPage: React.FC = () => {
   const [collection, setCollection] = useState<Collection | null>(null);
   const { auth, is_auth } = useAuth();
   const { startLoading, stopLoading } = useLoading();
+  const [showModal, setShowModal] = useState(false);
+  const [images, setImages] = useState<Array<Image> | null>([]);
 
   const apiClient: AxiosInstance = axios.create({
     baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
@@ -63,9 +33,21 @@ const CollectionPage: React.FC = () => {
       Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
     },
   });
-  const API = new api(apiClient);
+  const apiClient1: AxiosInstance = axios.create({
+    baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
+    timeout: 1000000, // Request timeout (in milliseconds)
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
+    },
+  });
+  const API = new Api(apiClient);
+  const API_Uploader = new Api(apiClient1);
   // Helper to check if it's an edit action
   const isEditAction = location.search.includes("Action=edit");
+
+  // Get translated images
+  let translatedImages: Array<Image> = [];
 
   // Simulate fetching data for the edit page (mocking API call)
   useEffect(() => {
@@ -80,8 +62,10 @@ const CollectionPage: React.FC = () => {
     }
   }, [id, is_auth]);
 
-  // Get translated images
-  const translatedImages = images.filter((img) => img.is_translated);
+  useEffect(() => {
+    // Get translated images
+    if (images) translatedImages = images.filter((img) => img.is_translated);
+  }, [images]);
 
   useEffect(() => {
     if (translatedImages.length > 0) {
@@ -89,6 +73,17 @@ const CollectionPage: React.FC = () => {
     }
   }, [currentImageIndex, translatedImages]);
 
+  useEffect(() => {
+    if (collection) {
+      const asyncfunction = async () => {
+        startLoading();
+        const images = await API.getImages(collection.id);
+        setImages(images);
+        stopLoading();
+      };
+      asyncfunction();
+    }
+  }, [collection]);
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     startLoading();
@@ -124,6 +119,18 @@ const CollectionPage: React.FC = () => {
         stopLoading();
       };
       asyncfunction();
+    }
+  };
+  const handleUpload = async (file: File) => {
+    if (collection) {
+      startLoading();
+      const Image = await API_Uploader.uploadImage(file, collection?.id);
+      stopLoading();
+      if (Image) {
+        const new_images: Array<Image> | null = images;
+        new_images?.push(Image);
+        if (new_images != undefined) setImages(new_images);
+      }
     }
   };
   // Custom Return Button (fixed top-left with border)
@@ -211,19 +218,38 @@ const CollectionPage: React.FC = () => {
             >
               Save Changes
             </button>
-            <button className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600">
-              Images Upload
-            </button>
           </div>
         </form>
+        <button
+          className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
+          onClick={() => setShowModal(true)}
+        >
+          Add Images
+        </button>
+        {/* Upload Modal */}
+        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+          <UploadContent onUpload={handleUpload} />
+          <div className="mt-5 flex justify-end space-x-2">
+            <button
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              onClick={() => setShowModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </Modal>
         <Row className="align-items-center w-full">
-          {images.map((image) => {
-            return (
-              <Col lg={4} md={6} sm={12} key={image.id} className="p-0">
-                <ImageComponent {...image} />
-              </Col>
-            );
-          })}
+          {images ? (
+            images.map((image) => {
+              return (
+                <Col lg={4} md={6} sm={12} key={image.id} className="p-0">
+                  <ImageComponent {...image} />
+                </Col>
+              );
+            })
+          ) : (
+            <></>
+          )}
         </Row>
         <ReturnButton key={id} />
       </div>
