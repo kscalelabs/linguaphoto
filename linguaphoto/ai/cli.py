@@ -7,9 +7,8 @@ from pathlib import Path
 
 from openai import AsyncOpenAI
 from PIL import Image
-
-from linguaphoto.ai.transcribe import transcribe_image
-from linguaphoto.ai.tts import synthesize_text
+from transcribe import transcribe_image
+from tts import synthesize_text
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +25,11 @@ async def main() -> None:
 
     # Transcribes the image.
     image = Image.open(args.image)
-    client = AsyncOpenAI()
+    client = AsyncOpenAI(
+        api_key="sk-svcacct-PFETCFHtqmHOmIpP_IAyQfBGz5LOpvC6Zudj7d5Wcdp9WjJT4ImAxuotGcpyT3BlbkFJRbtswQqIxYHam9TN13mCM04_OTZE-v8z-Rw1WEcwzyZqW_GcK0PNNyFp6BcA"
+    )
     transcription_response = await transcribe_image(image, client)
+    print(transcription_response.model_dump_json(indent=2))
     with open(root_dir / "transcription.json", "w") as file:
         file.write(transcription_response.model_dump_json(indent=2))
     logger.info("Transcription saved to %s", args.output)

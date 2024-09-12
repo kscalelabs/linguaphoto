@@ -5,9 +5,15 @@ import Modal from "components/modal";
 import UploadContent from "components/UploadContent";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Col, Row } from "react-bootstrap";
-import { ArrowLeft } from "react-bootstrap-icons";
+import {
+  ArrowLeft,
+  CaretLeft,
+  CaretRight,
+  SkipBackward,
+  SkipForward,
+} from "react-bootstrap-icons";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Collection, Image } from "types/model";
 
@@ -18,6 +24,7 @@ const CollectionPage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
   const [currentImage, setCurrentImage] = useState<Image | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
   const { auth, is_auth } = useAuth();
@@ -25,29 +32,44 @@ const CollectionPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [images, setImages] = useState<Array<Image> | null>([]);
 
-  const apiClient: AxiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
-    timeout: 10000, // Request timeout (in milliseconds)
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
-    },
-  });
-  const apiClient1: AxiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
-    timeout: 1000000, // Request timeout (in milliseconds)
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
-    },
-  });
-  const API = new Api(apiClient);
-  const API_Uploader = new Api(apiClient1);
+  const apiClient: AxiosInstance = useMemo(
+    () =>
+      axios.create({
+        baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
+        timeout: 10000, // Request timeout (in milliseconds)
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
+        },
+      }),
+    [auth?.token],
+  );
+  const apiClient1: AxiosInstance = useMemo(
+    () =>
+      axios.create({
+        baseURL: process.env.REACT_APP_BACKEND_URL,
+        timeout: 1000000,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${auth?.token}`,
+        },
+      }),
+    [auth?.token],
+  );
+  const API = useMemo(() => new Api(apiClient), [apiClient]);
+  const API_Uploader = useMemo(() => new Api(apiClient1), [apiClient1]);
   // Helper to check if it's an edit action
-  const isEditAction = location.search.includes("Action=edit");
+  const isEditAction = useMemo(
+    () => location.search.includes("Action=edit"),
+    [location.search],
+  );
 
   // Get translated images
-  let translatedImages: Array<Image> = [];
+  const translatedImages = useMemo(() => {
+    // Get translated images
+    if (images) return images.filter((img) => img.is_translated);
+    return [];
+  }, [images]);
 
   // Simulate fetching data for the edit page (mocking API call)
   useEffect(() => {
@@ -61,11 +83,6 @@ const CollectionPage: React.FC = () => {
       asyncfunction();
     }
   }, [id, is_auth]);
-
-  useEffect(() => {
-    // Get translated images
-    if (images) translatedImages = images.filter((img) => img.is_translated);
-  }, [images]);
 
   useEffect(() => {
     if (translatedImages.length > 0) {
@@ -96,15 +113,31 @@ const CollectionPage: React.FC = () => {
   const handleNext = () => {
     if (currentImageIndex < translatedImages.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
+      setCurrentTranscriptionIndex(0);
     }
   };
 
   const handlePrev = () => {
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1);
+      setCurrentTranscriptionIndex(0);
+    }
+  };
+  // Navigate transcriptions
+  const handleTranscriptionNext = () => {
+    if (
+      currentImage?.transcriptions &&
+      currentTranscriptionIndex < currentImage?.transcriptions.length - 1
+    ) {
+      setCurrentTranscriptionIndex(currentTranscriptionIndex + 1);
     }
   };
 
+  const handleTranscriptionPrev = () => {
+    if (currentTranscriptionIndex > 0) {
+      setCurrentTranscriptionIndex(currentTranscriptionIndex - 1);
+    }
+  };
   // Return button handler
   const handleReturn = () => {
     navigate("/collections");
@@ -131,6 +164,16 @@ const CollectionPage: React.FC = () => {
         new_images?.push(Image);
         if (new_images != undefined) setImages(new_images);
       }
+    }
+  };
+  const handleTranslateOneImage = async (image_id: string) => {
+    if (images) {
+      startLoading();
+      const image_response = await API.translateImages([image_id]);
+      const i = images?.findIndex((image) => image.id == image_id);
+      images[i] = image_response[0];
+      setImages([...images]);
+      stopLoading();
     }
   };
   // Custom Return Button (fixed top-left with border)
@@ -243,7 +286,10 @@ const CollectionPage: React.FC = () => {
             images.map((image) => {
               return (
                 <Col lg={4} md={6} sm={12} key={image.id} className="p-0">
-                  <ImageComponent {...image} />
+                  <ImageComponent
+                    {...image}
+                    handleTranslateOneImage={handleTranslateOneImage}
+                  />
                 </Col>
               );
             })
@@ -269,16 +315,33 @@ const CollectionPage: React.FC = () => {
               alt="Collection Image"
               className="max-h-96 h-auto mx-auto mb-4"
             />
-            <p className="mt-2">{currentImage.transcript}</p>
+            <p className="mt-2">
+              {currentImage.transcriptions[currentTranscriptionIndex].text}
+            </p>
+            <p className="mt-2">
+              {currentImage.transcriptions[currentTranscriptionIndex].pinyin}
+            </p>
+            <p className="mt-2">
+              {
+                currentImage.transcriptions[currentTranscriptionIndex]
+                  .translation
+              }
+            </p>
             <audio controls className="mt-4 w-full">
-              <source src={currentImage.audio_url} type="audio/mpeg" />
+              <source
+                src={
+                  currentImage.transcriptions[currentTranscriptionIndex]
+                    .audio_url
+                }
+                type="audio/mpeg"
+              />
               Your browser does not support the audio element.
             </audio>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-4 w-40">
+            <div className="flex justify-content-center mt-4 w-40 gap-4">
               <button
-                className={`px-3 py-1 rounded ${
+                className={`px-5 py-3 rounded ${
                   currentImageIndex === 0
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                     : "bg-gray-500 text-white hover:bg-gray-600"
@@ -286,10 +349,38 @@ const CollectionPage: React.FC = () => {
                 onClick={handlePrev}
                 disabled={currentImageIndex === 0}
               >
-                Prev
+                <SkipBackward size={22} />
               </button>
               <button
-                className={`px-3 py-1 rounded ${
+                className={`px-5 py-3 rounded ${
+                  currentTranscriptionIndex === 0
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
+                }`}
+                onClick={handleTranscriptionPrev}
+                disabled={currentTranscriptionIndex === 0}
+              >
+                <CaretLeft size={22} />
+              </button>
+              <button
+                className={`px-5 py-3 rounded ${
+                  currentTranscriptionIndex ===
+                    currentImage.transcriptions.length - 1 ||
+                  currentImage.transcriptions.length === 0
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
+                }`}
+                onClick={handleTranscriptionNext}
+                disabled={
+                  currentTranscriptionIndex ===
+                    currentImage.transcriptions.length - 1 ||
+                  currentImage.transcriptions.length === 0
+                }
+              >
+                <CaretRight size={22} />
+              </button>
+              <button
+                className={`px-5 py-3 rounded ${
                   currentImageIndex === translatedImages.length - 1
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                     : "bg-gray-500 text-white hover:bg-gray-600"
@@ -297,7 +388,7 @@ const CollectionPage: React.FC = () => {
                 onClick={handleNext}
                 disabled={currentImageIndex === translatedImages.length - 1}
               >
-                Next
+                <SkipForward size={22} />
               </button>
             </div>
           </div>
