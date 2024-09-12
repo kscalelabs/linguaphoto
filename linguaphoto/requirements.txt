@@ -34,3 +34,6 @@ numpy-stl
 types-aioboto3[dynamodb, s3]
 
 python-dotenv
+
+#AI
+openai

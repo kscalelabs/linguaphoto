@@ -62,12 +62,22 @@ class Collection(LinguaBaseModel):
         return cls(id=str(uuid4()), title=title, description=description, user=user_id)
 
 
+class Transcription(BaseModel):
+    text: str
+    pinyin: str
+    translation: str
+    audio_url: str
+
+
+class TranscriptionResponse(BaseModel):
+    transcriptions: list[Transcription]
+
+
 class Image(LinguaBaseModel):
-    is_traslated: bool = False
-    transcript: str | None = None
+    is_translated: bool = False
+    transcriptions: list[Transcription] = []
     collection: str | None = None
     image_url: str
-    audio_url: str | None = None
     user: str
 
     @classmethod

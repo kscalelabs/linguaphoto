@@ -1,15 +1,16 @@
 """Uses the OpenAI API to transcribe an image to text."""
 
-import argparse
-import asyncio
+# import argparse
+
+# import asyncio
 import base64
 import logging
 from io import BytesIO
 
 import aiohttp
+from models import TranscriptionResponse
 from openai import AsyncOpenAI
 from PIL import Image
-from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +24,14 @@ returning it as a JSON object. For example, this is a valid response:
         {
             "text": "你好，我朋友！",
             "pinyin": "nǐhǎo, wǒ péngyǒu!",
-            "translation": "Hello, my friend!"
+            "translation": "Hello, my friend!",
+            "audio_url":""
         },
         {
             "text": "我找到了工作。",
             "pinyin": "wǒ zhǎodàole gōngzuò.",
-            "translation": "I found a job."
+            "translation": "I found a job.",
+            "audio_url":""
         }
     ]
 }
@@ -48,17 +51,8 @@ def encode_image(image: Image.Image) -> str:
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 
-class Transcription(BaseModel):
-    text: str
-    pinyin: str
-    translation: str
-
-
-class TranscriptionResponse(BaseModel):
-    transcriptions: list[Transcription]
-
-
-async def transcribe_image(image: Image.Image, client: AsyncOpenAI) -> TranscriptionResponse:
+async def transcribe_image(image_source: BytesIO, client: AsyncOpenAI) -> TranscriptionResponse:
+    image = Image.open(image_source)
     """Transcribes the image to text.
 
     Args:
@@ -101,23 +95,23 @@ async def transcribe_image(image: Image.Image, client: AsyncOpenAI) -> Transcrip
     return transcription_response
 
 
-async def run_adhoc_test() -> None:
-    logging.basicConfig(level=logging.INFO)
+# async def run_adhoc_test() -> None:
+#     logging.basicConfig(level=logging.INFO)
 
-    parser = argparse.ArgumentParser(description="Transcribe an image to text.")
-    parser.add_argument("image", type=str, help="The path to the image to transcribe.")
-    parser.add_argument("output", type=str, help="The path to save the transcription.")
-    args = parser.parse_args()
+#     parser = argparse.ArgumentParser(description="Transcribe an image to text.")
+#     parser.add_argument("image", type=str, help="The path to the image to transcribe.")
+#     parser.add_argument("output", type=str, help="The path to save the transcription.")
+#     args = parser.parse_args()
 
-    image = Image.open(args.image)
-    client = AsyncOpenAI()
-    transcription_response = await transcribe_image(image, client)
+#     image = Image.open(args.image)
+#     client = AsyncOpenAI()
+#     transcription_response = await transcribe_image(image, client)
 
-    with open(args.output, "w") as file:
-        file.write(transcription_response.model_dump_json(indent=2))
-    logger.info("Transcription saved to %s", args.output)
+#     with open(args.output, "w") as file:
+#         file.write(transcription_response.model_dump_json(indent=2))
+#     logger.info("Transcription saved to %s", args.output)
 
 
-if __name__ == "__main__":
-    # python -m linguaphoto.ai.transcribe
-    asyncio.run(run_adhoc_test())
+# if __name__ == "__main__":
+#     # python -m linguaphoto.ai.transcribe
+#     asyncio.run(run_adhoc_test())

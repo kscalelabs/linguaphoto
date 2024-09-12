@@ -1,13 +1,16 @@
 import React from "react";
 import { CheckCircleFill, LockFill, PencilFill } from "react-bootstrap-icons";
 import { Image } from "types/model";
-
-const ImageComponent: React.FC<Image> = ({
-  // id,
+// Extend the existing Image interface to include the new function
+interface ImageWithFunction extends Image {
+  handleTranslateOneImage: (image_id: string) => void;
+}
+const ImageComponent: React.FC<ImageWithFunction> = ({
+  id,
   is_translated,
   image_url,
-  // audio_url,
-  transcript,
+  transcriptions,
+  handleTranslateOneImage,
 }) => {
   return (
     <div
@@ -22,7 +25,9 @@ const ImageComponent: React.FC<Image> = ({
               <span>The image has been translated</span>
             </div>
             <div className="absolute bottom-2 text-white bg-gray-800 py-1 px-3 mx-2 rounded">
-              <span>{transcript}</span>
+              {transcriptions.map((transcription, index) => (
+                <span key={index}>{transcription.text}&nbsp;&nbsp;</span>
+              ))}
             </div>
           </>
         ) : (
@@ -41,7 +46,10 @@ const ImageComponent: React.FC<Image> = ({
               Edit
             </button>
           ) : (
-            <button className="bg-blue-500 text-white py-1 px-3 rounded">
+            <button
+              className="bg-blue-500 text-white py-1 px-3 rounded"
+              onClick={() => handleTranslateOneImage(id)}
+            >
               Translate
             </button>
           )}
