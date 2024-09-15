@@ -82,9 +82,7 @@ class ImageCrud(BaseCrud):
             if response.status_code == 200:
                 img_source = BytesIO(response.content)
                 # Initialize OpenAI client for transcription and speech synthesis
-                client = AsyncOpenAI(
-                    api_key="sk-svcacct-PFETCFHtqmHOmIpP_IAyQfBGz5LOpvC6Zudj7d5Wcdp9WjJT4ImAxuotGcpyT3BlbkFJRbtswQqIxYHam9TN13mCM04_OTZE-v8z-Rw1WEcwzyZqW_GcK0PNNyFp6BcA"
-                )
+                client = AsyncOpenAI(api_key=settings.openai_key)
                 transcription_response = await transcribe_image(img_source, client)
                 # Process each transcription and generate corresponding audio
                 for i, transcription in enumerate(transcription_response.transcriptions):
