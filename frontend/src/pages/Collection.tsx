@@ -5,7 +5,7 @@ import Modal from "components/modal";
 import UploadContent from "components/UploadContent";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import {
   ArrowLeft,
@@ -31,6 +31,7 @@ const CollectionPage: React.FC = () => {
   const { startLoading, stopLoading } = useLoading();
   const [showModal, setShowModal] = useState(false);
   const [images, setImages] = useState<Array<Image> | null>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const apiClient: AxiosInstance = useMemo(
     () =>
@@ -101,6 +102,11 @@ const CollectionPage: React.FC = () => {
       asyncfunction();
     }
   }, [collection]);
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
+  }, [currentTranscriptionIndex, currentImageIndex]);
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     startLoading();
@@ -327,7 +333,7 @@ const CollectionPage: React.FC = () => {
                   .translation
               }
             </p>
-            <audio controls className="mt-4 w-full">
+            <audio controls className="mt-4 w-full" ref={audioRef}>
               <source
                 src={
                   currentImage.transcriptions[currentTranscriptionIndex]
