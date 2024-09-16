@@ -72,6 +72,13 @@ class ImageCrud(BaseCrud):
         images = await self._get_items_from_secondary_index("user", user_id, Image, Key("collection").eq(collection_id))
         return images
 
+    async def get_image(self, image_id: str) -> Image:
+        image = await self._get_item(image_id, Image, True)
+        return image
+
+    async def delete_image(self, image_id: str) -> None:
+        await self._delete_item(image_id)
+
     # Translates the images to text and synthesizes audio for the transcriptions
     async def translate(self, images: List[str], user_id: str) -> List[Image]:
         image_instances = []

@@ -5,6 +5,7 @@ import Modal from "components/modal";
 import UploadContent from "components/UploadContent";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
+import { useAlertQueue } from "hooks/alerts";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import {
@@ -29,10 +30,12 @@ const CollectionPage: React.FC = () => {
   const [collection, setCollection] = useState<Collection | null>(null);
   const { auth, is_auth } = useAuth();
   const { startLoading, stopLoading } = useLoading();
-  const [showModal, setShowModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
   const [images, setImages] = useState<Array<Image> | null>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
+  const { addAlert } = useAlertQueue();
+  const [deleteImageIndex, setDeleteImageIndex] = useState<string>("");
   const apiClient: AxiosInstance = useMemo(
     () =>
       axios.create({
@@ -101,7 +104,7 @@ const CollectionPage: React.FC = () => {
       };
       asyncfunction();
     }
-  }, [collection]);
+  }, [collection?.id]);
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.load();
@@ -111,8 +114,10 @@ const CollectionPage: React.FC = () => {
     e.preventDefault();
     startLoading();
     const collection = await API.createCollection({ title, description });
-    if (collection != null)
+    if (collection != null) {
       navigate(`/collection/${collection.id}?Action=edit`);
+      addAlert("New collection has been created successfully!", "success");
+    } else addAlert("The process has gone wrong!", "error");
     stopLoading();
   };
   // Navigate between images
@@ -155,6 +160,7 @@ const CollectionPage: React.FC = () => {
       const asyncfunction = async () => {
         startLoading();
         await API.editCollection(collection);
+        addAlert("The collection has been updated successfully!", "success");
         stopLoading();
       };
       asyncfunction();
@@ -175,10 +181,32 @@ const CollectionPage: React.FC = () => {
   const handleTranslateOneImage = async (image_id: string) => {
     if (images) {
       startLoading();
+      addAlert(
+        "The image is being tranlated. Please wait a moment.",
+        "primary",
+      );
       const image_response = await API.translateImages([image_id]);
       const i = images?.findIndex((image) => image.id == image_id);
       images[i] = image_response[0];
       setImages([...images]);
+      addAlert("The image has been tranlated!", "success");
+      stopLoading();
+    }
+  };
+  const onShowDeleteImageModal = (id: string) => {
+    setDeleteImageIndex(id);
+    setShowDeleteImageModal(true);
+  };
+  const onDeleteImage = async () => {
+    if (deleteImageIndex) {
+      startLoading();
+      await API.deleteImage(deleteImageIndex);
+      if (images) {
+        const filter = images.filter((image) => image.id != deleteImageIndex);
+        setImages(filter);
+      }
+      setShowDeleteImageModal(false);
+      addAlert("The image has been deleted!", "success");
       stopLoading();
     }
   };
@@ -198,7 +226,7 @@ const CollectionPage: React.FC = () => {
       <div className="flex flex-col items-center pt-20 gap-8">
         <h1>New Collection</h1>
         <form
-          className="flex flex-col items-end gap-4 w-96"
+          className="flex flex-col items-end gap-4 w-full"
           onSubmit={handleCreate}
         >
           <input
@@ -271,19 +299,42 @@ const CollectionPage: React.FC = () => {
         </form>
         <button
           className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowUploadModal(true)}
         >
           Add Images
         </button>
         {/* Upload Modal */}
-        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+        <Modal
+          isOpen={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+        >
           <UploadContent onUpload={handleUpload} />
           <div className="mt-5 flex justify-end space-x-2">
             <button
               className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowUploadModal(false)}
             >
               Close
+            </button>
+          </div>
+        </Modal>
+        <Modal
+          isOpen={showDeleteImageModal}
+          onClose={() => setShowDeleteImageModal(false)}
+        >
+          <div className="mt-5 flex justify-end space-x-2 gap-4 items-center">
+            <span>Are you sure you want to delete the collection?</span>
+            <button
+              className="px-4 py-2 bg-red-700 text-gray-300 rounded hover:bg-red-800"
+              onClick={onDeleteImage}
+            >
+              Delete
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              onClick={() => setShowDeleteImageModal(false)}
+            >
+              Cancel
             </button>
           </div>
         </Modal>
@@ -295,6 +346,7 @@ const CollectionPage: React.FC = () => {
                   <ImageComponent
                     {...image}
                     handleTranslateOneImage={handleTranslateOneImage}
+                    showDeleteModal={onShowDeleteImageModal}
                   />
                 </Col>
               );

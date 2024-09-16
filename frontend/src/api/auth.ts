@@ -22,7 +22,6 @@ export const read_me = async (token: string): Promise<Response | null> => {
 };
 export const signin = async (data: SigninData): Promise<Response> => {
   const response = await axios.post(`${API_URL}/signin`, data);
-  console.log(response);
   return response.data;
 };
 export const social_facebook_login = async (

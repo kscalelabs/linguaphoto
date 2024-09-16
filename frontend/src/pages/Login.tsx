@@ -1,6 +1,7 @@
 import { signin, signup } from "api/auth";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
+import { useAlertQueue } from "hooks/alerts";
 import React, { useEffect, useState } from "react";
 import { Google } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +13,7 @@ const LoginPage: React.FC = () => {
   const { startLoading, stopLoading } = useLoading();
   const { is_auth, setAuth } = useAuth();
   const navigate = useNavigate();
+  const { addAlert } = useAlertQueue();
   useEffect(() => {
     if (is_auth) navigate("/collections");
   }, [is_auth]);
@@ -29,12 +31,22 @@ const LoginPage: React.FC = () => {
       startLoading();
       const user = await signup({ email, password, username });
       setAuth(user);
+      if (user)
+        addAlert("Welcome! You have been successfully signed up!", "success");
+      else
+        addAlert(
+          "Sorry. The email or password have been exist already!",
+          "error",
+        );
       stopLoading();
     } else {
       // You can call your API for login
       startLoading();
       const user = await signin({ email, password });
       setAuth(user);
+      if (user)
+        addAlert("Welcome! You have been successfully signed in!", "success");
+      else addAlert("Sorry. The email or password are invalid.", "error");
       stopLoading();
     }
   };

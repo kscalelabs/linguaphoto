@@ -20,6 +20,8 @@ class CollectionCrud(BaseCrud):
         collections = await self._get_items_from_secondary_index("user", user_id, Collection)
         return collections
 
-    async def edit_collection(self, id: str, user_id: str, updates: dict) -> None:
-        # TODO: confirm user have the permission to edit this collection.
+    async def edit_collection(self, id: str, updates: dict) -> None:
         await self._update_item(id, Collection, updates)
+
+    async def delete_collection(self, collection_id: str) -> None:
+        await self._delete_item(collection_id)

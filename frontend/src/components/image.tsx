@@ -1,9 +1,15 @@
 import React from "react";
-import { CheckCircleFill, LockFill, PencilFill } from "react-bootstrap-icons";
+import {
+  CheckCircleFill,
+  LockFill,
+  PencilFill,
+  TrashFill,
+} from "react-bootstrap-icons";
 import { Image } from "types/model";
 // Extend the existing Image interface to include the new function
 interface ImageWithFunction extends Image {
   handleTranslateOneImage: (image_id: string) => void;
+  showDeleteModal: (id: string) => void;
 }
 const ImageComponent: React.FC<ImageWithFunction> = ({
   id,
@@ -11,6 +17,7 @@ const ImageComponent: React.FC<ImageWithFunction> = ({
   image_url,
   transcriptions,
   handleTranslateOneImage,
+  showDeleteModal,
 }) => {
   return (
     <div
@@ -41,17 +48,39 @@ const ImageComponent: React.FC<ImageWithFunction> = ({
         {/* Centered Edit Button */}
         <div className="absolute inset-x-0 bottom-1/2 transform translate-y-1/2 flex items-center justify-center gap-2">
           {is_translated ? (
-            <button className="bg-yellow-500 text-white py-1 px-3 rounded flex items-center">
-              <PencilFill className="mr-2" />
-              Edit
-            </button>
+            <div className="flex gap-2">
+              <button className="bg-yellow-500 text-white py-1 px-3 rounded flex items-center">
+                <PencilFill className="mr-2" />
+                Edit
+              </button>
+              <button
+                className="bg-red-500 text-white py-1 px-2 rounded flex items-center"
+                onClick={() => {
+                  showDeleteModal(id);
+                }}
+              >
+                <TrashFill className="mr-2" />
+                Delete
+              </button>
+            </div>
           ) : (
-            <button
-              className="bg-blue-500 text-white py-1 px-3 rounded"
-              onClick={() => handleTranslateOneImage(id)}
-            >
-              Translate
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="bg-blue-500 text-white py-1 px-3 rounded"
+                onClick={() => handleTranslateOneImage(id)}
+              >
+                Translate
+              </button>
+              <button
+                className="bg-red-500 text-white py-1 px-2 rounded flex items-center"
+                onClick={() => {
+                  showDeleteModal(id);
+                }}
+              >
+                <TrashFill className="mr-2" />
+                Delete
+              </button>
+            </div>
           )}
         </div>
       </div>
