@@ -14,7 +14,12 @@ from types_aiobotocore_dynamodb.service_resource import DynamoDBServiceResource
 from types_aiobotocore_s3.service_resource import S3ServiceResource
 
 T = TypeVar("T", bound=BaseModel)
+
 TABLE_NAME = settings.dynamodb_table_name
+DEFAULT_CHUNK_SIZE = 100
+DEFAULT_SCAN_LIMIT = 1000
+ITEMS_PER_PAGE = 12
+
 logger = logging.getLogger(__name__)
 
 
@@ -162,6 +167,39 @@ class BaseCrud(AsyncContextManager):
             if e.response["Error"]["Code"] == "ValidationException":
                 raise ValueError(f"Invalid update: {str(e)}")
             raise
+
+    async def _delete_item(self, item: BaseModel | str) -> None:
+        table = await self.db.Table(TABLE_NAME)
+        await table.delete_item(Key={"id": item if isinstance(item, str) else item.id})
+
+    async def _list_items(
+        self,
+        item_class: type[T],
+        expression_attribute_names: dict[str, str] | None = None,
+        expression_attribute_values: dict[str, Any] | None = None,
+        filter_expression: str | None = None,
+        offset: int | None = None,
+        limit: int = DEFAULT_SCAN_LIMIT,
+    ) -> list[T]:
+        table = await self.db.Table(TABLE_NAME)
+
+        query_params = {
+            "IndexName": "type_index",
+            "KeyConditionExpression": Key("type").eq(item_class.__name__),
+            "Limit": limit,
+        }
+
+        if expression_attribute_names:
+            query_params["ExpressionAttributeNames"] = expression_attribute_names
+        if expression_attribute_values:
+            query_params["ExpressionAttributeValues"] = expression_attribute_values
+        if filter_expression:
+            query_params["FilterExpression"] = filter_expression
+        if offset:
+            query_params["ExclusiveStartKey"] = {"id": offset}
+
+        items = (await table.query(**query_params))["Items"]
+        return [self._validate_item(item, item_class) for item in items]
 
     async def _upload_to_s3(self, file: BinaryIO, unique_filename: str) -> None:
         bucket = await self.s3.Bucket(settings.bucket_name)

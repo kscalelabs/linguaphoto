@@ -1,7 +1,7 @@
+import { useAlertQueue } from "hooks/alerts";
 import { FC, useState } from "react";
 import { XCircleFill } from "react-bootstrap-icons";
 import ImageUploading, { ImageListType } from "react-images-uploading";
-
 interface UploadContentProps {
   onUpload: (file: File) => Promise<void>; // Updated to handle a single file
 }
@@ -9,7 +9,7 @@ interface UploadContentProps {
 const UploadContent: FC<UploadContentProps> = ({ onUpload }) => {
   const [images, setImages] = useState<ImageListType>([]);
   const [uploading, setUploading] = useState<boolean>(false);
-  // const [uploadIndex, setUploadIndex] = useState<number>(0);
+  const { addAlert } = useAlertQueue();
 
   const maxNumber = 10; // Set the maximum number of files allowed
 
@@ -21,9 +21,11 @@ const UploadContent: FC<UploadContentProps> = ({ onUpload }) => {
       const file = images[i].file as File;
       try {
         await onUpload(file); // Upload each file one by one
-        // Optionally, handle success feedback here
+        if (i == images.length - 1)
+          addAlert(`${i + 1} images has been uploaded!`, "success");
       } catch (error) {
-        console.error(`Failed to upload file ${file.name}:`, error);
+        addAlert(`${file.name} has been failed to upload. ${error}`, "error");
+        break;
         // Optionally, handle failure feedback here
       }
     }

@@ -63,3 +63,14 @@ async def editcollection(
             updates={"title": collection.title, "description": collection.description, "images": collection.images},
         )
         return
+
+
+@router.get("/delete_collection")
+async def deletecollection(
+    id: str,
+    user_id: str = Depends(get_current_user_id),
+    collection_crud: CollectionCrud = Depends(),
+) -> None:
+    async with collection_crud:
+        await collection_crud.delete_collection(collection_id=id)
+        return

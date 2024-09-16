@@ -1,8 +1,11 @@
+import { TrashFill } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import { Collection } from "types/model";
-
-const CardItem: React.FC<Collection> = (collectionProps) => {
-  const { id, title, description, images } = collectionProps;
+interface CardItemProps extends Collection {
+  onDelete: (id: string) => void;
+}
+const CardItem: React.FC<CardItemProps> = (cardprops) => {
+  const { id, title, description, images, onDelete } = cardprops;
   const navigate = useNavigate();
 
   const handleOpen = () => {
@@ -11,6 +14,9 @@ const CardItem: React.FC<Collection> = (collectionProps) => {
 
   const handleEdit = () => {
     navigate(`/collection/${id}?Action=edit`);
+  };
+  const handleDelete = () => {
+    onDelete(id);
   };
 
   return (
@@ -23,6 +29,7 @@ const CardItem: React.FC<Collection> = (collectionProps) => {
         <p className="text-sm text-gray-800 dark:text-gray-200 grow">
           {images.length} Images
         </p>
+
         <div className="absolute inset-0 flex items-end pb-3 justify-center group-hover:opacity-100 opacity-0 transition-opacity">
           <div className="flex gap-2">
             <button
@@ -36,6 +43,12 @@ const CardItem: React.FC<Collection> = (collectionProps) => {
               onClick={handleEdit}
             >
               Edit
+            </button>
+            <button
+              className="bg-red-700 text-white flex justify-content-center items-center w-8 h-8 rounded"
+              onClick={handleDelete}
+            >
+              <TrashFill size={18} />
             </button>
           </div>
         </div>

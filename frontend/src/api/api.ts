@@ -42,9 +42,17 @@ export class Api {
     await this.api.post(`/edit_collection`, data);
     return null;
   }
-  public async getAllCollections(): Promise<Array<Collection> | null> {
+  public async getAllCollections(): Promise<Array<Collection> | []> {
     const response = await this.api.get(`/get_collections`);
     return response.data;
+  }
+  public async deleteCollection(collection_id: string): Promise<null> {
+    await this.api.get(`/delete_collection?id=${collection_id}`);
+    return null;
+  }
+  public async deleteImage(image_id: string): Promise<null> {
+    await this.api.get(`/delete_image?id=${image_id}`);
+    return null;
   }
   public async uploadImage(file: File, collection_id: string): Promise<Image> {
     const response = await this.api.post("/upload", {
