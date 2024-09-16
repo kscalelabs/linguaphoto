@@ -29,5 +29,5 @@ run:
       value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:id::"
     - name: AWS_SECRET_ACCESS_KEY
       value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:key::"
-    - name: AWS_SECRET_ACCESS_KEY
-      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:openai_key::"
+    # - name: AWS_SECRET_ACCESS_KEY
+    #   value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:openai_key::"
