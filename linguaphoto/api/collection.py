@@ -59,7 +59,6 @@ async def editcollection(
     async with collection_crud:
         await collection_crud.edit_collection(
             collection.id,
-            user_id=user_id,
             updates={"title": collection.title, "description": collection.description, "images": collection.images},
         )
         return
