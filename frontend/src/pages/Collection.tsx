@@ -1,12 +1,14 @@
 import { Api } from "api/api";
 import axios, { AxiosInstance } from "axios";
+import AudioPlayer from "components/Audio";
 import ImageComponent from "components/image";
 import Modal from "components/modal";
 import UploadContent from "components/UploadContent";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { Col, Row } from "react-bootstrap";
 import {
   ArrowLeft,
@@ -33,9 +35,11 @@ const CollectionPage: React.FC = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
   const [images, setImages] = useState<Array<Image> | null>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [reorderImageIds, setReorderImageIds] = useState<Array<string> | null>(
+    [],
+  );
   const { addAlert } = useAlertQueue();
-  const [deleteImageIndex, setDeleteImageIndex] = useState<string>("");
+  const [deleteImageId, setDeleteImageId] = useState<string>("");
   const apiClient: AxiosInstance = useMemo(
     () =>
       axios.create({
@@ -48,6 +52,11 @@ const CollectionPage: React.FC = () => {
       }),
     [auth?.token],
   );
+  useEffect(() => {
+    if (collection && collection.images) {
+      setReorderImageIds([...collection.images]);
+    }
+  }, [collection]);
   const apiClient1: AxiosInstance = useMemo(
     () =>
       axios.create({
@@ -71,7 +80,16 @@ const CollectionPage: React.FC = () => {
   // Get translated images
   const translatedImages = useMemo(() => {
     // Get translated images
-    if (images) return images.filter((img) => img.is_translated);
+    if (images) {
+      const filter = images.filter((img) => img.is_translated);
+      const final_filter = reorderImageIds
+        ?.map((img) => {
+          const foundItem = filter.find((item) => item.id == img);
+          return foundItem ? foundItem : null; // Return `null` or skip
+        })
+        .filter(Boolean); // Filters out `null` or `undefined`
+      if (final_filter) return final_filter;
+    }
     return [];
   }, [images]);
 
@@ -105,11 +123,7 @@ const CollectionPage: React.FC = () => {
       asyncfunction();
     }
   }, [collection?.id]);
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.load();
-    }
-  }, [currentTranscriptionIndex, currentImageIndex]);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     startLoading();
@@ -156,10 +170,12 @@ const CollectionPage: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (collection) {
+    if (collection && reorderImageIds) {
       const asyncfunction = async () => {
         startLoading();
+        collection.images = reorderImageIds;
         await API.editCollection(collection);
+        setCollection({ ...collection });
         addAlert("The collection has been updated successfully!", "success");
         stopLoading();
       };
@@ -174,7 +190,11 @@ const CollectionPage: React.FC = () => {
       if (Image) {
         const new_images: Array<Image> | null = images;
         new_images?.push(Image);
-        if (new_images != undefined) setImages(new_images);
+        if (new_images != undefined) {
+          setImages(new_images);
+          collection.images.push(Image.id);
+          setCollection({ ...collection });
+        }
       }
     }
   };
@@ -193,17 +213,34 @@ const CollectionPage: React.FC = () => {
       stopLoading();
     }
   };
+  // Inside your CollectionPage component
+  /* eslint-disable */
+  const handleDragEnd = (result: any) => {
+    /* eslint-enable */
+    if (!result.destination || !reorderImageIds) return;
+    const [removed] = reorderImageIds.splice(result.source.index, 1);
+    reorderImageIds.splice(result.destination.index, 0, removed);
+    setReorderImageIds([...reorderImageIds]);
+
+    // Optionally, you can save the new order to your backend here
+  };
+
   const onShowDeleteImageModal = (id: string) => {
-    setDeleteImageIndex(id);
+    setDeleteImageId(id);
     setShowDeleteImageModal(true);
   };
   const onDeleteImage = async () => {
-    if (deleteImageIndex) {
+    if (deleteImageId) {
       startLoading();
-      await API.deleteImage(deleteImageIndex);
+      await API.deleteImage(deleteImageId);
       if (images) {
-        const filter = images.filter((image) => image.id != deleteImageIndex);
+        const filter = images.filter((image) => image.id !== deleteImageId);
         setImages(filter);
+        const filteredId = collection?.images.filter(
+          (image) => image !== deleteImageId,
+        );
+        if (filteredId) setReorderImageIds(filteredId);
+        else setReorderImageIds([]);
       }
       setShowDeleteImageModal(false);
       addAlert("The image has been deleted!", "success");
@@ -297,12 +334,21 @@ const CollectionPage: React.FC = () => {
             </button>
           </div>
         </form>
-        <button
-          className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
-          onClick={() => setShowUploadModal(true)}
-        >
-          Add Images
-        </button>
+        <div className="flex gap-4">
+          <button
+            className="bg-blue-500 text-white w-35 p-2 rounded hover:bg-blue-600"
+            onClick={() => setShowUploadModal(true)}
+          >
+            Add Images
+          </button>
+          <button
+            className="bg-blue-500 text-white w-35 p-2 rounded hover:bg-blue-600 disabled:bg-gray-600"
+            onClick={(e) => handleSave(e)}
+            disabled={reorderImageIds?.join() === collection.images.join()}
+          >
+            Order Save
+          </button>
+        </div>
         {/* Upload Modal */}
         <Modal
           isOpen={showUploadModal}
@@ -338,23 +384,54 @@ const CollectionPage: React.FC = () => {
             </button>
           </div>
         </Modal>
-        <Row className="align-items-center w-full">
-          {images ? (
-            images.map((image) => {
-              return (
-                <Col lg={4} md={6} sm={12} key={image.id} className="p-0">
-                  <ImageComponent
-                    {...image}
-                    handleTranslateOneImage={handleTranslateOneImage}
-                    showDeleteModal={onShowDeleteImageModal}
-                  />
-                </Col>
-              );
-            })
-          ) : (
-            <></>
-          )}
-        </Row>
+        {/* Drag and Drop for Images */}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="imageList" direction="horizontal">
+            {(provided) => (
+              <Row
+                className="align-items-center w-full"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {reorderImageIds ? (
+                  reorderImageIds.map((id, index) => {
+                    const image = images?.find((item) => item.id === id);
+                    if (image) {
+                      return (
+                        <Draggable key={id} draggableId={id} index={index}>
+                          {(provided) => (
+                            <Col
+                              lg={4}
+                              md={6}
+                              sm={12}
+                              className="p-0"
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <ImageComponent
+                                {...image}
+                                handleTranslateOneImage={
+                                  handleTranslateOneImage
+                                }
+                                showDeleteModal={onShowDeleteImageModal}
+                              />
+                            </Col>
+                          )}
+                        </Draggable>
+                      );
+                    }
+                    return null; // Prevent rendering undefined
+                  })
+                ) : (
+                  <></>
+                )}
+                {provided.placeholder} {/* Important for drag and drop */}
+              </Row>
+            )}
+          </Droppable>
+        </DragDropContext>
+
         <ReturnButton key={id} />
       </div>
     );
@@ -385,16 +462,10 @@ const CollectionPage: React.FC = () => {
                   .translation
               }
             </p>
-            <audio controls className="mt-4 w-full" ref={audioRef}>
-              <source
-                src={
-                  currentImage.transcriptions[currentTranscriptionIndex]
-                    .audio_url
-                }
-                type="audio/mpeg"
-              />
-              Your browser does not support the audio element.
-            </audio>
+            <AudioPlayer
+              currentImage={currentImage}
+              index={currentTranscriptionIndex}
+            />
 
             {/* Navigation Buttons */}
             <div className="flex justify-content-center mt-4 w-40 gap-4">
