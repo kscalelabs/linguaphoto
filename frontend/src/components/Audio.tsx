@@ -113,8 +113,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
             onClick={togglePlayPause}
             className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
           >
-          {isPlaying ? <FaPause /> : <FaPlay />}
-        </button>
+            {isPlaying ? <FaPause /> : <FaPlay />}
+          </button>
 
           <button
             onClick={stopAudio}
@@ -122,25 +122,25 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
           >
             <FaStop />
           </button>
-      </div>
+        </div>
         <div className="flex items-center">
-        <label htmlFor="speed" className="mr-2">
-          Speed:
-        </label>
-        <select
-          id="speed"
-          value={playbackRate}
-          onChange={handleSpeedChange}
-          className="border p-1 rounded"
-        >
-          <option value="0.5">0.5x</option>
+          <label htmlFor="speed" className="mr-2">
+            Speed:
+          </label>
+          <select
+            id="speed"
+            value={playbackRate}
+            onChange={handleSpeedChange}
+            className="border p-1 rounded"
+          >
+            <option value="0.5">0.5x</option>
             <option value="0.7">0.7x</option>
             <option value="0.9">0.9x</option>
-          <option value="1">1x (Normal)</option>
-          <option value="1.2">1.2x</option>
-        </select>
+            <option value="1">1x (Normal)</option>
+            <option value="1.2">1.2x</option>
+          </select>
         </div>
-        
+
         <div className="flex items-center">
           <FaVolumeDown className="mr-2" />
           <input
