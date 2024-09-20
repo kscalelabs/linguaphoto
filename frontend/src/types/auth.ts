@@ -12,4 +12,6 @@ export interface Response {
   username?: string;
   email?: string;
   token?: string | null;
+  is_subscription?: boolean;
+  is_auth?: boolean;
 }

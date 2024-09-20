@@ -31,6 +31,7 @@ class User(LinguaBaseModel):
     username: str
     email: str
     password_hash: str
+    is_subscription: bool
 
     @classmethod
     def create(cls, user: UserSignupFragment) -> Self:
@@ -39,6 +40,7 @@ class User(LinguaBaseModel):
             id=str(uuid4()),
             username=user.username,
             email=user.email,
+            is_subscription=False,
             password_hash=hashpw(user.password.encode("utf-8"), gensalt()).decode("utf-8"),
         )
 

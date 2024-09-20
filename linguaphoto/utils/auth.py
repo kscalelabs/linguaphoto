@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from typing import Union
 
 import jwt
+from crud.user import UserCrud
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
@@ -51,3 +52,14 @@ async def get_current_user_id(token: str = Depends(oauth2_schema)) -> str:
     if user_id is None:
         raise HTTPException(status_code=422, detail="Could not validate credentials")
     return user_id
+
+
+async def subscription_validate(token: str = Depends(oauth2_schema), user_crud: UserCrud = Depends()) -> bool:
+    user_id = decode_access_token(token)
+    if user_id is None:
+        raise HTTPException(status_code=422, detail="Could not validate credentials")
+    async with user_crud:
+        user = await user_crud.get_user(user_id, True)
+    if user.is_subscription is False:
+        raise HTTPException(status_code=422, detail="You need to subscribe.")
+    return True

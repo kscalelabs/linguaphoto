@@ -11,12 +11,12 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [username, setName] = useState("");
   const { startLoading, stopLoading } = useLoading();
-  const { is_auth, setAuth } = useAuth();
+  const { auth, setAuth } = useAuth();
   const navigate = useNavigate();
   const { addAlert } = useAlertQueue();
   useEffect(() => {
-    if (is_auth) navigate("/collections");
-  }, [is_auth]);
+    if (auth?.is_auth) navigate("/collections");
+  }, [auth]);
   // Toggle between login and signup forms
   const handleSwitch = () => {
     setIsSignup(!isSignup);

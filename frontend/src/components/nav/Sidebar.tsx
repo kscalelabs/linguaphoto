@@ -70,7 +70,7 @@ interface SidebarProps {
 
 const Sidebar = ({ show, onClose }: SidebarProps) => {
   const navigate = useNavigate();
-  const { is_auth, signout } = useAuth();
+  const { auth, signout } = useAuth();
   return (
     <div>
       {show ? (
@@ -106,7 +106,7 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
                 }}
                 size="md"
               />
-              {is_auth ? (
+              {auth?.is_auth ? (
                 <SidebarItem
                   title="Collections"
                   icon={<FaThList />}
@@ -120,10 +120,10 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
                 <></>
               )}
               <SidebarItem
-                title="Privacy"
+                title="Subscription"
                 icon={<FaLock />}
                 onClick={() => {
-                  navigate("/privacy");
+                  navigate("/subscription");
                   onClose();
                 }}
                 size="md"
@@ -134,7 +134,7 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
             <hr className="my-4 border-gray-300 dark:border-gray-600" />
 
             <ul className="space-y-1">
-              {is_auth ? (
+              {auth?.is_auth ? (
                 <SidebarItem
                   title="Logout"
                   icon={<FaSignOutAlt />}

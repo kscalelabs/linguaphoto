@@ -7,7 +7,7 @@ from crud.image import ImageCrud
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from models import Image
 from pydantic import BaseModel
-from utils.auth import get_current_user_id
+from utils.auth import get_current_user_id, subscription_validate
 
 
 class TranslateFramgement(BaseModel):
@@ -22,6 +22,7 @@ async def upload_image(
     file: UploadFile = File(...),
     id: Annotated[str, Form()] = "",
     user_id: str = Depends(get_current_user_id),
+    is_subscribed: bool = Depends(subscription_validate),
     image_crud: ImageCrud = Depends(),
 ) -> Image:
     """Upload Image and create new Image."""
@@ -61,7 +62,10 @@ async def delete_image(
 
 @router.post("/translate", response_model=List[Image])
 async def translate(
-    data: TranslateFramgement, user_id: str = Depends(get_current_user_id), image_crud: ImageCrud = Depends()
+    data: TranslateFramgement,
+    user_id: str = Depends(get_current_user_id),
+    image_crud: ImageCrud = Depends(),
+    is_subscribed: bool = Depends(subscription_validate),
 ) -> List[Image]:
     async with image_crud:
         images = await image_crud.translate(data.images, user_id=user_id)

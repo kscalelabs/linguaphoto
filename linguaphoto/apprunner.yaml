@@ -24,10 +24,14 @@ run:
       value: "https://media.linguaphoto.com"
     - name: KEY_PAIR_ID
       value: "K1DH6VMVUTIVWJ"
+    - name: STRIPE_PRODUCT_PRICE_ID
+      value: "price_1Q0ZaZKeTo38dsfe1D6G8SCg"
   secrets:
     - name: AWS_ACCESS_KEY_ID
       value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:id::"
     - name: AWS_SECRET_ACCESS_KEY
       value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:key::"
-    # - name: AWS_SECRET_ACCESS_KEY
-    #   value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:openai_key::"
+    - name: OPENAI_API_KEY
+      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:openai_key::"
+    - name: STRIPE_API_KEY
+      value-from: "arn:aws:secretsmanager:us-east-1:725596835855:secret:linguaphoto-u59FHw:stripe_private_key::"

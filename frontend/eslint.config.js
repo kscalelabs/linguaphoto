@@ -21,7 +21,14 @@ export default [
     ...pluginReactConfig,
     rules: {
       ...pluginReactConfig.rules,
-      "react/react-in-jsx-scope": "off",
+      "react/react-in-jsx-scope": "off", 
+      "react/prop-types": "off", // Disable prop-types validation
     },
   }),
+  {
+    files: ["*.ts", "*.tsx"], // Apply this rule to TypeScript files
+    rules: {
+      "react/prop-types": "off", // Ensure prop-types are off for TypeScript files
+    },
+  },
 ];
