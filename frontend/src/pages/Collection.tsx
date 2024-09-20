@@ -28,7 +28,7 @@ const CollectionPage: React.FC = () => {
   const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
   const [currentImage, setCurrentImage] = useState<Image | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
-  const { auth, is_auth } = useAuth();
+  const { auth } = useAuth();
   const { startLoading, stopLoading } = useLoading();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
@@ -77,7 +77,7 @@ const CollectionPage: React.FC = () => {
 
   // Simulate fetching data for the edit page (mocking API call)
   useEffect(() => {
-    if (id && is_auth) {
+    if (id && auth?.is_auth) {
       startLoading();
       const asyncfunction = async () => {
         const collection = await API.getCollection(id);
@@ -86,7 +86,7 @@ const CollectionPage: React.FC = () => {
       };
       asyncfunction();
     }
-  }, [id, is_auth]);
+  }, [id, auth]);
 
   useEffect(() => {
     if (translatedImages.length > 0) {

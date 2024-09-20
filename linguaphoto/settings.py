@@ -25,10 +25,9 @@ class Settings:
     aws_region_name = os.getenv("AWS_REGION")
     aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-    openai_key = os.getenv(
-        "OPENAI_API_KEY",
-        "sk-svcacct-PFETCFHtqmHOmIpP_IAyQfBGz5LOpvC6Zudj7d5Wcdp9WjJT4ImAxuotGcpyT3BlbkFJRbtswQqIxYHam9TN13mCM04_OTZE-v8z-Rw1WEcwzyZqW_GcK0PNNyFp6BcA",
-    )
+    openai_key = os.getenv("OPENAI_API_KEY")
+    stripe_key = os.getenv("STRIPE_API_KEY")
+    stripe_price_id = os.getenv("STRIPE_PRODUCT_PRICE_ID")
 
 
 settings = Settings()

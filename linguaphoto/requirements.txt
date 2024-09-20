@@ -39,3 +39,4 @@ python-dotenv
 openai
 
 requests
+stripe

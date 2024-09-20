@@ -31,3 +31,7 @@ class UserCrud(BaseCrud):
             return user_instance.verify_password(user.password)
         else:
             raise ValueError
+
+    async def update_user(self, id: str, data: dict) -> User | None:
+        user = await self._update_item(id, User, data)
+        return user

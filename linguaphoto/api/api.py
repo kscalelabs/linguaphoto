@@ -12,7 +12,7 @@ This module is intended to be included in the main FastAPI application
 to handle routing for the entire API.
 """
 
-from api import collection, image, user
+from api import collection, image, subscription, user
 from fastapi import APIRouter
 
 # Create a new API router
@@ -22,6 +22,7 @@ router = APIRouter()
 router.include_router(user.router)
 router.include_router(collection.router)
 router.include_router(image.router)
+router.include_router(subscription.router)
 
 
 # Define a root endpoint that returns a simple message

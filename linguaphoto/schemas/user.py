@@ -26,3 +26,5 @@ class UserSigninRespondFragment(BaseModel):
     token: str
     username: str
     email: EmailStr
+    is_subscription: bool
+    is_auth: bool

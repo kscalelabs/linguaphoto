@@ -24,10 +24,18 @@ async def signup(user: UserSignupFragment, user_crud: UserCrud = Depends()) -> d
     async with user_crud:
         new_user = await user_crud.create_user_from_email(user)
         if new_user is None:
-            return None
+            print(
+                UserSigninRespondFragment(
+                    token="", username=user.username, email=user.email, is_subscription=False, is_auth=False
+                ).model_dump()
+            )
+            return UserSigninRespondFragment(
+                token="", username=user.username, email=user.email, is_subscription=False, is_auth=False
+            ).model_dump()
         token = create_access_token({"id": new_user.id}, timedelta(hours=24))
-        res_user = UserSigninRespondFragment(token=token, username=user.username, email=user.email)
-        return res_user.model_dump()
+        res_user = new_user.model_dump()
+        res_user.update({"token": token, "is_auth": True})
+        return res_user
 
 
 @router.post("/signin", response_model=UserSigninRespondFragment | None)
@@ -42,7 +50,7 @@ async def signin(user: UserSigninFragment, user_crud: UserCrud = Depends()) -> d
             res_user = await user_crud.get_user_by_email(user.email)
             user_dict = res_user.__dict__
             token = create_access_token({"id": user_dict["id"]}, timedelta(hours=24))
-            user_dict.update({"token": token})
+            user_dict.update({"token": token, "is_auth": True})
             return user_dict
         else:
             raise HTTPException(status_code=422, detail="Could not validate credentials")
@@ -63,5 +71,6 @@ async def get_me(token: str = Depends(oauth2_schema), user_crud: UserCrud = Depe
         if user is None:
             raise HTTPException(status_code=422, detail="user not found")
         dict_user = user.model_dump()
-        dict_user.update({"token": token})
+        dict_user.update({"token": token, "is_auth": True})
+        print(dict_user)
         return dict_user

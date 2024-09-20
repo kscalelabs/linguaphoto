@@ -10,7 +10,6 @@ import React, {
 import { Response } from "types/auth";
 
 interface AuthContextType {
-  is_auth: boolean;
   auth: Response | null;
   setAuth: React.Dispatch<React.SetStateAction<Response | null>>;
   signout: () => void;
@@ -20,11 +19,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuth] = useState<Response | null>(null);
-  const [is_auth, setFlag] = useState<boolean>(false);
   const signout = () => {
     localStorage.removeItem("token");
     setAuth({});
-    setFlag(false);
   };
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,7 +29,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       const fetch_data = async (token: string) => {
         try {
           const response = await read_me(token);
-          if (response) setAuth(response);
+          setAuth(response);
         } catch {
           return;
         }
@@ -43,14 +40,12 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (auth?.token) {
       localStorage.setItem("token", auth.token);
-      setFlag(true);
     }
-  }, [auth]);
+  }, [auth?.token]);
   return (
     <AuthContext.Provider
       value={{
         auth,
-        is_auth,
         setAuth,
         signout,
       }}

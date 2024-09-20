@@ -5,6 +5,13 @@ export interface CollectionCreateFragment {
   title: string;
   description: string;
 }
+// Define the types for the API response and request payload
+export interface SubscriptionResponse {
+  success: boolean;
+  error?: string;
+  requires_action?: boolean;
+  payment_intent_client_secret?: string;
+}
 export class Api {
   public api: AxiosInstance;
 
@@ -74,5 +81,19 @@ export class Api {
       { timeout: 300000 },
     );
     return response.data;
+  }
+
+  public async createSubscription(
+    payment_method_id: string,
+    email: string,
+    name: string,
+  ): Promise<SubscriptionResponse> {
+    // Send payment method to the backend for subscription creation
+    const { data } = await this.api.post("/create_subscription", {
+      payment_method_id,
+      email,
+      name,
+    });
+    return data;
   }
 }

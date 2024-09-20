@@ -12,7 +12,7 @@ import { Collection } from "types/model";
 
 const Collections = () => {
   const [collections, setCollection] = useState<Array<Collection> | []>([]);
-  const { is_auth, auth } = useAuth();
+  const { auth } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const { startLoading, stopLoading } = useLoading();
   const [delete_ID, setDeleteID] = useState(String);
@@ -37,7 +37,7 @@ const Collections = () => {
   };
 
   useEffect(() => {
-    if (is_auth) {
+    if (auth?.is_auth) {
       const asyncfunction = async () => {
         startLoading();
         const collections = await API.getAllCollections();
@@ -46,7 +46,7 @@ const Collections = () => {
       };
       asyncfunction();
     }
-  }, [is_auth]);
+  }, [auth]);
 
   const apiClient: AxiosInstance = useMemo(
     () =>
