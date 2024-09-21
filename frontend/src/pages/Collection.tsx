@@ -8,8 +8,8 @@ import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
 import React, { useEffect, useMemo, useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { Col, Row } from "react-bootstrap";
+import { ListManager } from "react-beautiful-dnd-grid";
+import { Col } from "react-bootstrap";
 import {
   ArrowLeft,
   CaretLeft,
@@ -215,13 +215,12 @@ const CollectionPage: React.FC = () => {
   };
   // Inside your CollectionPage component
   /* eslint-disable */
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (sourceIndex: number, destinationIndex: number) => {
     /* eslint-enable */
-    if (!result.destination || !reorderImageIds) return;
-    const [removed] = reorderImageIds.splice(result.source.index, 1);
-    reorderImageIds.splice(result.destination.index, 0, removed);
+    if (!reorderImageIds) return;
+    const [removed] = reorderImageIds.splice(sourceIndex, 1);
+    reorderImageIds.splice(destinationIndex, 0, removed);
     setReorderImageIds([...reorderImageIds]);
-
     // Optionally, you can save the new order to your backend here
   };
 
@@ -384,54 +383,41 @@ const CollectionPage: React.FC = () => {
             </button>
           </div>
         </Modal>
-        {/* Drag and Drop for Images */}
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="imageList" direction="horizontal">
-            {(provided) => (
-              <Row
-                className="align-items-center w-full"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {reorderImageIds ? (
-                  reorderImageIds.map((id, index) => {
-                    const image = images?.find((item) => item.id === id);
-                    if (image) {
-                      return (
-                        <Draggable key={id} draggableId={id} index={index}>
-                          {(provided) => (
-                            <Col
-                              lg={4}
-                              md={6}
-                              sm={12}
-                              className="p-0"
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <ImageComponent
-                                {...image}
-                                handleTranslateOneImage={
-                                  handleTranslateOneImage
-                                }
-                                showDeleteModal={onShowDeleteImageModal}
-                              />
-                            </Col>
-                          )}
-                        </Draggable>
-                      );
-                    }
-                    return null; // Prevent rendering undefined
-                  })
-                ) : (
-                  <></>
-                )}
-                {provided.placeholder} {/* Important for drag and drop */}
-              </Row>
-            )}
-          </Droppable>
-        </DragDropContext>
 
+        {reorderImageIds && (
+          <ListManager
+            items={reorderImageIds}
+            direction="horizontal"
+            maxItems={3}
+            onDragEnd={handleDragEnd}
+            render={(id) => {
+              const image = images?.find((item) => item.id === id);
+              return (
+                <Col lg={4} md={6} sm={12} className="p-0">
+                  {image ? (
+                    <ImageComponent
+                      {...image}
+                      handleTranslateOneImage={handleTranslateOneImage}
+                      showDeleteModal={onShowDeleteImageModal}
+                    />
+                  ) : (
+                    <ImageComponent
+                      {...{
+                        id,
+                        is_translated: false,
+                        image_url: "",
+                        transcriptions: [],
+                        collection: collection.id,
+                      }}
+                      handleTranslateOneImage={handleTranslateOneImage}
+                      showDeleteModal={onShowDeleteImageModal}
+                    />
+                  )}
+                </Col>
+              );
+            }}
+          />
+        )}
         <ReturnButton key={id} />
       </div>
     );
