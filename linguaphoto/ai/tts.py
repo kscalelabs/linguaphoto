@@ -6,8 +6,9 @@ import logging
 from pathlib import Path
 from typing import AsyncIterator
 
-from ai.transcribe import TranscriptionResponse
 from openai import AsyncOpenAI
+
+from linguaphoto.ai.transcribe import TranscriptionResponse
 
 logger = logging.getLogger(__name__)
 

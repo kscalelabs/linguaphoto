@@ -1,10 +1,11 @@
 """Defines the main entrypoint for the FastAPI app."""
 
 import uvicorn
-from api.api import router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from settings import settings
+
+from linguaphoto.api.api import router
+from linguaphoto.settings import settings
 
 app = FastAPI()
 

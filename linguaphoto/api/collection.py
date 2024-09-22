@@ -2,12 +2,13 @@
 
 from typing import List
 
-from crud.collection import CollectionCrud
-from errors import NotAuthorizedError
 from fastapi import APIRouter, Depends
-from models import Collection
-from schemas.collection import CollectionCreateFragment, CollectionEditFragment
-from utils.auth import get_current_user_id
+
+from linguaphoto.crud.collection import CollectionCrud
+from linguaphoto.errors import NotAuthorizedError
+from linguaphoto.models import Collection
+from linguaphoto.schemas.collection import CollectionCreateFragment, CollectionEditFragment
+from linguaphoto.utils.auth import get_current_user_id
 
 router = APIRouter()
 

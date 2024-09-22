@@ -7,8 +7,9 @@ from pathlib import Path
 
 from openai import AsyncOpenAI
 from PIL import Image
-from transcribe import transcribe_image
-from tts import synthesize_text
+
+from linguaphoto.ai.transcribe import transcribe_image
+from linguaphoto.ai.tts import synthesize_text
 
 logger = logging.getLogger(__name__)
 

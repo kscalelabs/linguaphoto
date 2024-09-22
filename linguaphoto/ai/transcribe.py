@@ -1,16 +1,14 @@
 """Uses the OpenAI API to transcribe an image to text."""
 
-# import argparse
-
-# import asyncio
 import base64
 import logging
 from io import BytesIO
 
 import aiohttp
-from models import TranscriptionResponse
 from openai import AsyncOpenAI
 from PIL import Image
+
+from linguaphoto.models import TranscriptionResponse
 
 logger = logging.getLogger(__name__)
 
