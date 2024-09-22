@@ -7,11 +7,12 @@ from typing import Any, AsyncContextManager, BinaryIO, Self, TypeVar
 import aioboto3
 from boto3.dynamodb.conditions import ComparisonCondition, Key
 from botocore.exceptions import ClientError
-from errors import InternalError, ItemNotFoundError
-from models import BaseModel, LinguaBaseModel
-from settings import settings
 from types_aiobotocore_dynamodb.service_resource import DynamoDBServiceResource
 from types_aiobotocore_s3.service_resource import S3ServiceResource
+
+from linguaphoto.errors import InternalError, ItemNotFoundError
+from linguaphoto.models import BaseModel, LinguaBaseModel
+from linguaphoto.settings import settings
 
 T = TypeVar("T", bound=BaseModel)
 

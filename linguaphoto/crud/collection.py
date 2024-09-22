@@ -2,8 +2,8 @@
 
 from typing import List
 
-from crud.base import BaseCrud
-from models import Collection
+from linguaphoto.crud.base import BaseCrud
+from linguaphoto.models import Collection
 
 
 class CollectionCrud(BaseCrud):

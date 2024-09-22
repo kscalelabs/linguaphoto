@@ -5,7 +5,8 @@ from uuid import uuid4
 
 from bcrypt import checkpw, gensalt, hashpw
 from pydantic import BaseModel
-from schemas.user import UserSignupFragment
+
+from linguaphoto.schemas.user import UserSignupFragment
 
 
 class LinguaBaseModel(BaseModel):

@@ -2,12 +2,13 @@
 
 from typing import Annotated, List
 
-from crud.collection import CollectionCrud
-from crud.image import ImageCrud
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from models import Image
 from pydantic import BaseModel
-from utils.auth import get_current_user_id, subscription_validate
+
+from linguaphoto.crud.collection import CollectionCrud
+from linguaphoto.crud.image import ImageCrud
+from linguaphoto.models import Image
+from linguaphoto.utils.auth import get_current_user_id, subscription_validate
 
 
 class TranslateFramgement(BaseModel):

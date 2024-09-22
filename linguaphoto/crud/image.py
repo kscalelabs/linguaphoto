@@ -6,16 +6,17 @@ from io import BytesIO
 from typing import List
 
 import requests
-from ai.transcribe import transcribe_image
-from ai.tts import synthesize_text
 from boto3.dynamodb.conditions import Key
-from crud.base import BaseCrud
-from errors import ItemNotFoundError
 from fastapi import HTTPException, UploadFile
-from models import Collection, Image
 from openai import AsyncOpenAI
-from settings import settings
-from utils.cloudfront_url_signer import CloudFrontUrlSigner
+
+from linguaphoto.ai.transcribe import transcribe_image
+from linguaphoto.ai.tts import synthesize_text
+from linguaphoto.crud.base import BaseCrud
+from linguaphoto.errors import ItemNotFoundError
+from linguaphoto.models import Collection, Image
+from linguaphoto.settings import settings
+from linguaphoto.utils.cloudfront_url_signer import CloudFrontUrlSigner
 
 key_pair_id = settings.key_pair_id
 media_hosting_server = settings.media_hosting_server

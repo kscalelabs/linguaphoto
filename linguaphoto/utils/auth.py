@@ -15,9 +15,10 @@ from datetime import datetime, timedelta
 from typing import Union
 
 import jwt
-from crud.user import UserCrud
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
+
+from linguaphoto.crud.user import UserCrud
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"

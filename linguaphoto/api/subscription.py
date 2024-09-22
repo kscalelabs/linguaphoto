@@ -1,10 +1,11 @@
 """Collection API."""
 
 import stripe
-from crud.user import UserCrud
 from fastapi import APIRouter, Depends, HTTPException
-from settings import settings
-from utils.auth import get_current_user_id
+
+from linguaphoto.crud.user import UserCrud
+from linguaphoto.settings import settings
+from linguaphoto.utils.auth import get_current_user_id
 
 router = APIRouter()
 

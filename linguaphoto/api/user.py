@@ -2,14 +2,15 @@
 
 from datetime import timedelta
 
-from crud.user import UserCrud
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.user import (
+
+from linguaphoto.crud.user import UserCrud
+from linguaphoto.schemas.user import (
     UserSigninFragment,
     UserSigninRespondFragment,
     UserSignupFragment,
 )
-from utils.auth import create_access_token, decode_access_token, oauth2_schema
+from linguaphoto.utils.auth import create_access_token, decode_access_token, oauth2_schema
 
 router = APIRouter()
 

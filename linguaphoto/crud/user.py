@@ -2,9 +2,9 @@
 
 from typing import List
 
-from crud.base import BaseCrud
-from models import User
-from schemas.user import UserSigninFragment, UserSignupFragment
+from linguaphoto.crud.base import BaseCrud
+from linguaphoto.models import User
+from linguaphoto.schemas.user import UserSigninFragment, UserSignupFragment
 
 
 class UserCrud(BaseCrud):

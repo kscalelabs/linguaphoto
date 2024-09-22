@@ -12,8 +12,9 @@ This module is intended to be included in the main FastAPI application
 to handle routing for the entire API.
 """
 
-from api import collection, image, subscription, user
 from fastapi import APIRouter
+
+from linguaphoto.api import collection, image, subscription, user
 
 # Create a new API router
 router = APIRouter()

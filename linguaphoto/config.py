@@ -24,7 +24,8 @@ from typing import Any
 import aioboto3
 import aioboto3.session
 from botocore.exceptions import NoCredentialsError
-from settings import settings
+
+from linguaphoto.settings import settings
 
 
 async def get_dynamodb_resource() -> Any:  # noqa: ANN401

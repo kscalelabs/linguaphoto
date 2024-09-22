@@ -27,7 +27,7 @@ all:
 # ------------------------ #
 
 start-backend:
-	@python 'linguaphoto/main.py'
+	@uvicorn linguaphoto.main:app --reload --port 8080 --host localhost
 
 start-frontend:
 	@cd frontend && npm start
