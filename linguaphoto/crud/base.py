@@ -64,8 +64,11 @@ class BaseCrud(AsyncContextManager):
         return self
 
     async def __aexit__(
-        self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: TracebackType | None
-    ) -> bool | None:
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         # Check if exc_type is None before using issubclass
         exception_type = exc_type if exc_type is not None and issubclass(exc_type, Exception) else None
         exception_value = exc_value if isinstance(exc_value, Exception) else None
@@ -75,8 +78,6 @@ class BaseCrud(AsyncContextManager):
             await self.__db.__aexit__(exception_type, exception_value, traceback)
         if self.__s3:
             await self.__s3.__aexit__(exception_type, exception_value, traceback)
-
-        return True
 
     def _validate_item(self, data: dict[str, Any], item_class: type[T]) -> T:
         if (item_type := data.pop("type")) != item_class.__name__:
