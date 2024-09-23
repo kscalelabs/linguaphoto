@@ -61,6 +61,8 @@ async def subscription_validate(token: str = Depends(oauth2_schema), user_crud: 
         raise HTTPException(status_code=422, detail="Could not validate credentials")
     async with user_crud:
         user = await user_crud.get_user(user_id, True)
+    if user is None:
+        raise HTTPException(status_code=422, detail="Could not validate credentials")
     if user.is_subscription is False:
         raise HTTPException(status_code=422, detail="You need to subscribe.")
     return True

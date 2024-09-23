@@ -73,7 +73,7 @@ class ImageCrud(BaseCrud):
         images = await self._get_items_from_secondary_index("user", user_id, Image, Key("collection").eq(collection_id))
         return images
 
-    async def get_image(self, image_id: str) -> Image:
+    async def get_image(self, image_id: str) -> Image | None:
         image = await self._get_item(image_id, Image, True)
         return image
 
@@ -86,6 +86,8 @@ class ImageCrud(BaseCrud):
         for id in images:
             # Retrieve image metadata and download the image content
             image_instance = await self._get_item(id, Image, True)
+            if image_instance is None:
+                continue
             response = requests.get(image_instance.image_url)
             if response.status_code == 200:
                 img_source = BytesIO(response.content)
@@ -102,6 +104,8 @@ class ImageCrud(BaseCrud):
                     # Set buffer position to the start
                     audio_buffer.seek(0)
                     audio_url = await self.create_audio(audio_buffer)
+                    if audio_url is None:
+                        continue
                     # Attach the audio URL to the transcription
                     transcription.audio_url = audio_url
                 image_instance.transcriptions = transcription_response.transcriptions

@@ -12,7 +12,7 @@ class CollectionCrud(BaseCrud):
         await self._add_item(collection)
         return collection
 
-    async def get_collection(self, collection_id: str) -> Collection:
+    async def get_collection(self, collection_id: str) -> Collection | None:
         collection = await self._get_item(collection_id, Collection, True)
         return collection
 

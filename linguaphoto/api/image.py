@@ -54,8 +54,9 @@ async def delete_image(
         if image:
             async with collection_crud:
                 collection = await collection_crud.get_collection(image.collection)
-                updated_images = list(filter(lambda image: image != id, collection.images))
-                await collection_crud.edit_collection(image.collection, {"images": updated_images})
+                if collection:
+                    updated_images = list(filter(lambda image: image != id, collection.images))
+                    await collection_crud.edit_collection(image.collection, {"images": updated_images})
                 await image_crud.delete_image(id)
                 return
     raise HTTPException(status_code=400, detail="Image is invalid")

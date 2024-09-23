@@ -33,7 +33,7 @@ class CloudFrontUrlSigner:
         with open(self.private_key_path, "r") as key_file:
             private_key = key_file.read()
         return rsa.sign(
-            message,  # Ensure message is in bytes
+            message.encode("utf8"),  # Ensure message is in bytes
             rsa.PrivateKey.load_pkcs1(private_key.encode("utf8")),
             "SHA-1",  # CloudFront requires SHA-1 hash
         )

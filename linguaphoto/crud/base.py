@@ -170,7 +170,7 @@ class BaseCrud(AsyncContextManager):
                 raise ValueError(f"Invalid update: {str(e)}")
             raise
 
-    async def _delete_item(self, item: BaseModel | str) -> None:
+    async def _delete_item(self, item: LinguaBaseModel | str) -> None:
         table = await self.db.Table(TABLE_NAME)
         await table.delete_item(Key={"id": item if isinstance(item, str) else item.id})
 

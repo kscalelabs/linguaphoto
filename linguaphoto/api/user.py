@@ -10,7 +10,11 @@ from linguaphoto.schemas.user import (
     UserSigninRespondFragment,
     UserSignupFragment,
 )
-from linguaphoto.utils.auth import create_access_token, decode_access_token, oauth2_schema
+from linguaphoto.utils.auth import (
+    create_access_token,
+    decode_access_token,
+    oauth2_schema,
+)
 
 router = APIRouter()
 
