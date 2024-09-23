@@ -79,7 +79,7 @@ class TranscriptionResponse(BaseModel):
 class Image(LinguaBaseModel):
     is_translated: bool = False
     transcriptions: list[Transcription] = []
-    collection: str | None = None
+    collection: str
     image_url: str
     user: str
 

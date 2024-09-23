@@ -18,7 +18,7 @@ load_dotenv()
 
 
 class Settings:
-    bucket_name = os.getenv("S3_BUCKET_NAME")
+    bucket_name = os.getenv("S3_BUCKET_NAME", "linguaphoto")
     dynamodb_table_name = os.getenv("DYNAMODB_TABLE_NAME", "linguaphoto")
     media_hosting_server = os.getenv("MEDIA_HOSTING_SERVER")
     key_pair_id = os.getenv("KEY_PAIR_ID")
@@ -27,7 +27,7 @@ class Settings:
     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
     openai_key = os.getenv("OPENAI_API_KEY")
     stripe_key = os.getenv("STRIPE_API_KEY")
-    stripe_price_id = os.getenv("STRIPE_PRODUCT_PRICE_ID")
+    stripe_price_id = os.getenv("STRIPE_PRODUCT_PRICE_ID", "price_1Q0ZaMKeTo38dsfeSWRDGCEf")
 
 
 settings = Settings()

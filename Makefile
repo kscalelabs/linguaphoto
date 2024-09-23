@@ -42,6 +42,7 @@ start-db:
 # ------------------------ #
 
 format-backend:
+	@isort linguaphoto
 	@black linguaphoto
 	@ruff format linguaphoto
 .PHONY: format

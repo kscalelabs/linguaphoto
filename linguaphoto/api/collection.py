@@ -7,7 +7,10 @@ from fastapi import APIRouter, Depends
 from linguaphoto.crud.collection import CollectionCrud
 from linguaphoto.errors import NotAuthorizedError
 from linguaphoto.models import Collection
-from linguaphoto.schemas.collection import CollectionCreateFragment, CollectionEditFragment
+from linguaphoto.schemas.collection import (
+    CollectionCreateFragment,
+    CollectionEditFragment,
+)
 from linguaphoto.utils.auth import get_current_user_id
 
 router = APIRouter()
@@ -33,10 +36,11 @@ async def create(
 @router.get("/get_collection", response_model=Collection)
 async def getcollection(
     id: str, user_id: str = Depends(get_current_user_id), collection_crud: CollectionCrud = Depends()
-) -> dict | None:
+) -> Collection:
     async with collection_crud:
         collection = await collection_crud.get_collection(id)
-        print(collection)
+        if collection is None:
+            raise ValueError
         if collection.user != user_id:
             raise NotAuthorizedError
         return collection

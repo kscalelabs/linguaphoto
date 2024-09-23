@@ -32,6 +32,5 @@ class UserCrud(BaseCrud):
         else:
             raise ValueError
 
-    async def update_user(self, id: str, data: dict) -> User | None:
-        user = await self._update_item(id, User, data)
-        return user
+    async def update_user(self, id: str, data: dict) -> None:
+        await self._update_item(id, User, data)

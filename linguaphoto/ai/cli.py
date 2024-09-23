@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import logging
+from io import BytesIO
 from pathlib import Path
 
 from openai import AsyncOpenAI
@@ -29,7 +30,13 @@ async def main() -> None:
     client = AsyncOpenAI(
         api_key="sk-svcacct-PFETCFHtqmHOmIpP_IAyQfBGz5LOpvC6Zudj7d5Wcdp9WjJT4ImAxuotGcpyT3BlbkFJRbtswQqIxYHam9TN13mCM04_OTZE-v8z-Rw1WEcwzyZqW_GcK0PNNyFp6BcA"
     )
-    transcription_response = await transcribe_image(image, client)
+    # Convert the ImageFile to BytesIO
+    image_bytes = BytesIO()
+    image.save(image_bytes, format="JPEG")  # Use the appropriate format for your image
+    image_bytes.seek(0)  # Reset the stream position to the beginning
+
+    # Now call the transcribe_image function with the BytesIO object
+    transcription_response = await transcribe_image(image_bytes, client)
     print(transcription_response.model_dump_json(indent=2))
     with open(root_dir / "transcription.json", "w") as file:
         file.write(transcription_response.model_dump_json(indent=2))
