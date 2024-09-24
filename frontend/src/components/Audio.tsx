@@ -93,6 +93,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.load();
+      audioRef.current.playbackRate = playbackRate;
     }
   }, [currentImage, index]);
 
