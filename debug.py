@@ -1,4 +1,5 @@
 """it is entity for debugging"""
+
 import uvicorn
 
 from linguaphoto.main import app

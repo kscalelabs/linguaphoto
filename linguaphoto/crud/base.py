@@ -1,8 +1,9 @@
 """Defines the base CRUD interface."""
 
+import itertools
 import logging
 from types import TracebackType
-from typing import Any, AsyncContextManager, BinaryIO, Self, TypeVar
+from typing import Any, AsyncContextManager, BinaryIO, Literal, Self, TypeVar
 
 import aioboto3
 from boto3.dynamodb.conditions import ComparisonCondition, Key
@@ -13,6 +14,7 @@ from types_aiobotocore_s3.service_resource import S3ServiceResource
 from linguaphoto.errors import InternalError, ItemNotFoundError
 from linguaphoto.models import BaseModel, LinguaBaseModel
 from linguaphoto.settings import settings
+from linguaphoto.utils.utils import get_cors_origins
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -20,6 +22,9 @@ TABLE_NAME = settings.dynamodb_table_name
 DEFAULT_CHUNK_SIZE = 100
 DEFAULT_SCAN_LIMIT = 1000
 ITEMS_PER_PAGE = 12
+
+TableKey = tuple[str, Literal["S", "N", "B"], Literal["HASH", "RANGE"]]
+GlobalSecondaryIndex = tuple[str, str, Literal["S", "N", "B"], Literal["HASH", "RANGE"]]
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +49,10 @@ class BaseCrud(AsyncContextManager):
     @classmethod
     def get_gsi_index_name(cls, colname: str) -> str:
         return f"{colname}-index"
+
+    @classmethod
+    def get_gsis(cls) -> set[str]:
+        return {"type"}
 
     async def __aenter__(self) -> Self:
         session = aioboto3.Session()
@@ -174,6 +183,66 @@ class BaseCrud(AsyncContextManager):
         table = await self.db.Table(TABLE_NAME)
         await table.delete_item(Key={"id": item if isinstance(item, str) else item.id})
 
+    async def _create_dynamodb_table(
+        self,
+        name: str,
+        keys: list[TableKey],
+        gsis: list[GlobalSecondaryIndex] | None = None,
+        deletion_protection: bool = False,
+    ) -> None:
+        """Creates a table in the Dynamo database if a table of that name does not already exist.
+
+        Args:
+            name: Name of the table.
+            keys: Primary and secondary keys. Do not include non-key attributes.
+            gsis: Making an attribute a GSI is required in order to query
+                against it. Note HASH on a GSI does not actually enforce
+                uniqueness. Instead, the difference is: you cannot query
+                RANGE fields alone, but you may query HASH fields.
+            deletion_protection: Whether the table is protected from being
+                deleted.
+        """
+        try:
+            await self.db.meta.client.describe_table(TableName=name)
+            logger.info("Found existing table %s", name)
+        except ClientError:
+            logger.info("Creating %s table", name)
+
+            if gsis:
+                table = await self.db.create_table(
+                    AttributeDefinitions=[
+                        {"AttributeName": n, "AttributeType": t}
+                        for n, t in itertools.chain(((n, t) for (n, t, _) in keys), ((n, t) for _, n, t, _ in gsis))
+                    ],
+                    TableName=name,
+                    KeySchema=[{"AttributeName": n, "KeyType": t} for n, _, t in keys],
+                    GlobalSecondaryIndexes=(
+                        [
+                            {
+                                "IndexName": i,
+                                "KeySchema": [{"AttributeName": n, "KeyType": t}],
+                                "Projection": {"ProjectionType": "ALL"},
+                            }
+                            for i, n, _, t in gsis
+                        ]
+                    ),
+                    DeletionProtectionEnabled=deletion_protection,
+                    BillingMode="PAY_PER_REQUEST",
+                )
+
+            else:
+                table = await self.db.create_table(
+                    AttributeDefinitions=[
+                        {"AttributeName": n, "AttributeType": t} for n, t in ((n, t) for (n, t, _) in keys)
+                    ],
+                    TableName=name,
+                    KeySchema=[{"AttributeName": n, "KeyType": t} for n, _, t in keys],
+                    DeletionProtectionEnabled=deletion_protection,
+                    BillingMode="PAY_PER_REQUEST",
+                )
+
+            await table.wait_until_exists()
+
     async def _list_items(
         self,
         item_class: type[T],
@@ -206,3 +275,48 @@ class BaseCrud(AsyncContextManager):
     async def _upload_to_s3(self, file: BinaryIO, unique_filename: str) -> None:
         bucket = await self.s3.Bucket(settings.bucket_name)
         await bucket.upload_fileobj(file, f"uploads/{unique_filename}")
+
+    async def _create_s3_bucket(self) -> None:
+        """Creates an S3 bucket if it does not already exist."""
+        try:
+            await self.s3.meta.client.head_bucket(Bucket=settings.bucket_name)
+            logger.info("Found existing bucket %s", settings.bucket_name)
+        except ClientError:
+            logger.info("Creating %s bucket", settings.bucket_name)
+            await self.s3.create_bucket(Bucket=settings.bucket_name)
+
+            logger.info("Updating %s CORS configuration", settings.bucket_name)
+            s3_cors = await self.s3.BucketCors(settings.bucket_name)
+            await s3_cors.put(
+                CORSConfiguration={
+                    "CORSRules": [
+                        {
+                            "AllowedHeaders": ["*"],
+                            "AllowedMethods": ["GET"],
+                            "AllowedOrigins": get_cors_origins(),
+                            "ExposeHeaders": ["ETag"],
+                        }
+                    ]
+                },
+            )
+
+    async def _delete_dynamodb_table(self, name: str) -> None:
+        """Deletes a table in the Dynamo database.
+
+        Args:
+            name: Name of the table.
+        """
+        try:
+            table = await self.db.Table(name)
+            await table.delete()
+            logger.info("Deleted table %s", name)
+        except ClientError:
+            logger.info("Table %s does not exist", name)
+
+    async def _delete_s3_bucket(self) -> None:
+        """Deletes an S3 bucket."""
+        bucket = await self.s3.Bucket(settings.bucket_name)
+        logger.info("Deleting bucket %s", settings.bucket_name)
+        async for obj in bucket.objects.all():
+            await obj.delete()
+        await bucket.delete()
