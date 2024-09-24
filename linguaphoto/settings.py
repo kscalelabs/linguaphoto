@@ -31,5 +31,4 @@ class Settings:
     homepage_url = os.getenv("HOMEPAGE_URL", "")
 
 
-
 settings = Settings()
