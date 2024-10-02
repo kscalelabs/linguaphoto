@@ -13,7 +13,6 @@ import LoginPage from "pages/Login";
 import NotFound from "pages/NotFound";
 import SubscriptionTypePage from "pages/SubscriptioinType";
 import SubscriptionCancelPage from "pages/Subscription";
-import Test from "pages/Test";
 import PrivateRoute from "ProtectedRoute";
 import { Container } from "react-bootstrap";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
@@ -30,7 +29,6 @@ const App = () => {
                 <Container>
                   <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/test" element={<Test />} />
                     <Route path="/404" element={<NotFound />} />
                     <Route
                       path="/collections"

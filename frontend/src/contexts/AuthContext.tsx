@@ -1,53 +1,111 @@
 // src/context/AuthContext.tsx
-import { read_me } from "api/auth";
+import { components, paths } from "gen/api";
+import createClient, { Client } from "openapi-fetch";
 import React, {
   createContext,
   ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
-import { Response } from "types/auth";
 
 interface AuthContextType {
-  auth: Response | null;
-  setAuth: React.Dispatch<React.SetStateAction<Response | null>>;
+  auth: components["schemas"]["UserInfoResponseItem"] | undefined;
+  setAuth: React.Dispatch<
+    React.SetStateAction<
+      components["schemas"]["UserInfoResponseItem"] | undefined
+    >
+  >;
+  setApiKeyId: React.Dispatch<React.SetStateAction<string | null>>;
   signout: () => void;
+  apiKeyId: string | null;
+  client: Client<paths>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const getLocalStorageAuth = (): string | null => {
+  return localStorage.getItem("token");
+};
 
+export const setLocalStorageAuth = (id: string) => {
+  localStorage.setItem("token", id);
+};
+
+export const deleteLocalStorageAuth = () => {
+  localStorage.removeItem("token");
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [auth, setAuth] = useState<Response | null>(null);
+  const [auth, setAuth] = useState<
+    components["schemas"]["UserInfoResponseItem"] | undefined
+  >(undefined);
+  const [apiKeyId, setApiKeyId] = useState<string | null>(
+    getLocalStorageAuth(),
+  );
   const signout = () => {
     localStorage.removeItem("token");
-    setAuth({});
+    setAuth(undefined);
+    setApiKeyId("");
   };
+  const client = useMemo(
+    () =>
+      createClient<paths>({
+        baseUrl: process.env.REACT_APP_BACKEND_URL,
+      }),
+    [apiKeyId],
+  );
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const fetch_data = async (token: string) => {
-        try {
-          const response = await read_me(token);
-          setAuth(response);
-        } catch {
-          return;
+    if (apiKeyId !== null) {
+      setLocalStorageAuth(apiKeyId);
+      client.use({
+        async onRequest({ request }) {
+          request.headers.set("Authorization", `Bearer ${apiKeyId}`);
+          return request;
+        },
+        async onResponse({ response }) {
+          return response;
+        },
+      });
+    }
+  }, [apiKeyId, client]);
+  useEffect(() => {
+    if (apiKeyId) {
+      const fetch_data = async () => {
+        const { data, error } = await client.GET("/me");
+        if (error) {
+          console.error("Failed to fetch current user", error);
+        } else {
+          setAuth(data);
+          setApiKeyId(data.token);
         }
       };
-      fetch_data(token);
+      fetch_data();
     } else signout();
-  }, []);
+  }, [apiKeyId, client]);
+
   useEffect(() => {
-    if (auth?.token) {
-      localStorage.setItem("token", auth.token);
+    if (apiKeyId !== null) {
+      client.use({
+        async onRequest({ request }) {
+          request.headers.set("Authorization", `Bearer ${apiKeyId}`);
+          return request;
+        },
+        async onResponse({ response }) {
+          return response;
+        },
+      });
     }
-  }, [auth?.token]);
+  }, [apiKeyId, client]);
   return (
     <AuthContext.Provider
       value={{
         auth,
         setAuth,
         signout,
+        client,
+        apiKeyId,
+        setApiKeyId,
       }}
     >
       {children}

@@ -1,23 +1,20 @@
-import { Api } from "api/api";
-import axios, { AxiosInstance } from "axios";
 import CardItem from "components/card";
 import Modal from "components/modal";
 import NewCardItem from "components/new_card";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import { Collection } from "types/model";
 
 const Collections = () => {
   const [collections, setCollection] = useState<Array<Collection> | []>([]);
-  const { auth } = useAuth();
+  const { auth, client } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const { startLoading, stopLoading } = useLoading();
   const [delete_ID, setDeleteID] = useState(String);
   const { addAlert } = useAlertQueue();
-
   const onDeleteModalShow = (id: string) => {
     setDeleteID(id);
     setShowModal(true);
@@ -25,13 +22,18 @@ const Collections = () => {
   const onDelete = async () => {
     if (delete_ID) {
       startLoading();
-      await API.deleteCollection(delete_ID);
-      const filter = collections?.filter(
-        (collection) => collection.id != delete_ID,
-      );
+      const { error } = await client.GET("/delete_collection", {
+        params: { query: { id: delete_ID } },
+      });
+      if (error) addAlert(error.detail?.toString(), "error");
+      else {
+        const filter = collections?.filter(
+          (collection) => collection.id != delete_ID,
+        );
+        setCollection(filter);
+        addAlert("The Collection has been deleted.", "success");
+      }
       setShowModal(false);
-      setCollection(filter);
-      addAlert("The Collection has been deleted.", "success");
       stopLoading();
     }
   };
@@ -40,27 +42,15 @@ const Collections = () => {
     if (auth?.is_auth) {
       const asyncfunction = async () => {
         startLoading();
-        const collections = await API.getAllCollections();
-        setCollection(collections);
+        const { data: collections, error } =
+          await client.GET("/get_collections");
+        if (error) addAlert(error.detail?.toString(), "error");
+        else setCollection(collections);
         stopLoading();
       };
       asyncfunction();
     }
   }, [auth]);
-
-  const apiClient: AxiosInstance = useMemo(
-    () =>
-      axios.create({
-        baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
-        timeout: 10000, // Request timeout (in milliseconds)
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
-        },
-      }),
-    [auth?.token],
-  );
-  const API = useMemo(() => new Api(apiClient), [apiClient]);
 
   return (
     <div className="flex-column pt-20 gap-4 d-flex justify-content-center">

@@ -29,12 +29,14 @@ const CollectionPage: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
   const [currentImage, setCurrentImage] = useState<Image | null>(null);
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const { auth } = useAuth();
+  const [collection, setCollection] = useState<Collection | undefined>(
+    undefined,
+  );
+  const { auth, client } = useAuth();
   const { startLoading, stopLoading } = useLoading();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
-  const [images, setImages] = useState<Array<Image> | null>([]);
+  const [images, setImages] = useState<Array<Image> | undefined>([]);
   const [reorderImageIds, setReorderImageIds] = useState<Array<string> | null>(
     [],
   );
@@ -98,8 +100,12 @@ const CollectionPage: React.FC = () => {
     if (id && auth?.is_auth) {
       startLoading();
       const asyncfunction = async () => {
-        const collection = await API.getCollection(id);
-        setCollection(collection);
+        const { data: collection, error } = await client.GET(
+          "/get_collection",
+          { params: { query: { id } } },
+        );
+        if (error) addAlert(error.detail?.toString(), "error");
+        else setCollection(collection);
         stopLoading();
       };
       asyncfunction();
@@ -116,8 +122,11 @@ const CollectionPage: React.FC = () => {
     if (collection) {
       const asyncfunction = async () => {
         startLoading();
-        const images = await API.getImages(collection.id);
-        setImages(images);
+        const { data: images, error } = await client.GET("/get_images", {
+          params: { query: { collection_id: collection.id } },
+        });
+        if (error) addAlert(error.detail?.toString(), "error");
+        else setImages(images);
         stopLoading();
       };
       asyncfunction();
@@ -127,8 +136,12 @@ const CollectionPage: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     startLoading();
-    const collection = await API.createCollection({ title, description });
-    if (collection != null) {
+    const { data: collection, error } = await client.POST(
+      "/create_collection",
+      { body: { title, description } },
+    );
+    if (error) addAlert(error.detail?.toString(), "error");
+    else if (collection != null) {
       navigate(`/collection/${collection.id}?Action=edit`);
       addAlert("New collection has been created successfully!", "success");
     } else addAlert("The process has gone wrong!", "error");
@@ -174,9 +187,12 @@ const CollectionPage: React.FC = () => {
       const asyncfunction = async () => {
         startLoading();
         collection.images = reorderImageIds;
-        await API.editCollection(collection);
-        setCollection({ ...collection });
-        addAlert("The collection has been updated successfully!", "success");
+        const { error } = await client.POST("/edit_collection", { collection });
+        if (error) addAlert(error.detail?.toString(), "error");
+        else {
+          setCollection({ ...collection });
+          addAlert("The collection has been updated successfully!", "success");
+        }
         stopLoading();
       };
       asyncfunction();
@@ -188,7 +204,7 @@ const CollectionPage: React.FC = () => {
       const Image = await API_Uploader.uploadImage(file, collection?.id);
       stopLoading();
       if (Image) {
-        const new_images: Array<Image> | null = images;
+        const new_images: Array<Image> | undefined = images;
         new_images?.push(Image);
         if (new_images != undefined) {
           setImages(new_images);
@@ -231,8 +247,11 @@ const CollectionPage: React.FC = () => {
   const onDeleteImage = async () => {
     if (deleteImageId) {
       startLoading();
-      await API.deleteImage(deleteImageId);
-      if (images) {
+      const { error } = await client.GET("/delete_image", {
+        params: { query: { id: deleteImageId } },
+      });
+      if (error) addAlert(error.detail?.toString(), "error");
+      else if (images) {
         const filter = images.filter((image) => image.id !== deleteImageId);
         setImages(filter);
         const filteredId = collection?.images.filter(
@@ -240,9 +259,9 @@ const CollectionPage: React.FC = () => {
         );
         if (filteredId) setReorderImageIds(filteredId);
         else setReorderImageIds([]);
+        addAlert("The image has been deleted!", "success");
       }
       setShowDeleteImageModal(false);
-      addAlert("The image has been deleted!", "success");
       stopLoading();
     }
   };

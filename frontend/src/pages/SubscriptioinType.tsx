@@ -6,13 +6,11 @@ import {
 } from "@stripe/react-stripe-js";
 
 import { loadStripe } from "@stripe/stripe-js";
-import { Api } from "api/api";
-import axios, { AxiosInstance } from "axios";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
 import { useTheme } from "hooks/theme";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_API_KEY || "");
@@ -22,28 +20,14 @@ const CheckoutForm = () => {
   const [error_message, setError] = useState<string | undefined>("");
   const [name, setName] = useState<string>(""); // Cardholder Name
   const [email, setEmail] = useState<string>(""); // Email Address
-  const { auth, setAuth } = useAuth();
+  const { auth, setAuth, client } = useAuth();
   const { theme } = useTheme();
   const { addAlert } = useAlertQueue();
   const { startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
-  const apiClient: AxiosInstance = useMemo(
-    () =>
-      axios.create({
-        baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
-        timeout: 10000, // Request timeout (in milliseconds)
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
-        },
-      }),
-    [auth?.token],
-  );
   useEffect(() => {
     if (auth?.email) setEmail(auth.email);
   }, [auth?.email]);
-
-  const API = useMemo(() => new Api(apiClient), [apiClient]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,15 +47,18 @@ const CheckoutForm = () => {
       }
       startLoading();
       // Send payment method to the backend for subscription creation
-      const data = await API.createSubscription(paymentMethod.id, email, name);
+      const { data, error: err } = await client.POST("/create_subscription", {
+        body: { payment_method_id: paymentMethod.id, email, name },
+      });
       stopLoading();
-      if (data.success) {
+      if (err?.detail) addAlert(err.detail.toString(), "error");
+      if (data?.success) {
         // Handle successful subscription (e.g., redirect or show success message)
-        setAuth({ ...auth, is_subscription: true });
+        if (auth) setAuth({ ...auth, is_subscription: true });
         addAlert("You have been subscribed successfully!", "success");
         navigate("/collections");
       } else {
-        setError(data.error);
+        setError(data?.error);
       } /* eslint-disable */
     } catch (error: any) {
       /* eslint-enable */

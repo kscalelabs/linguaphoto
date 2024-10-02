@@ -75,11 +75,9 @@ export class Api {
     return response.data;
   }
   public async translateImages(images: Array<string>): Promise<Array<Image>> {
-    const response = await this.api.post(
-      "/translate",
-      { images },
-      { timeout: 300000 },
-    );
+    const response = await this.api.post("/translate", images, {
+      timeout: 300000,
+    });
     return response.data;
   }
 
