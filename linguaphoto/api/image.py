@@ -3,17 +3,11 @@
 from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from pydantic import BaseModel
 
 from linguaphoto.crud.collection import CollectionCrud
 from linguaphoto.crud.image import ImageCrud
 from linguaphoto.models import Image
 from linguaphoto.utils.auth import get_current_user_id, subscription_validate
-
-
-class TranslateFramgement(BaseModel):
-    images: List[str]
-
 
 router = APIRouter()
 
@@ -64,11 +58,11 @@ async def delete_image(
 
 @router.post("/translate", response_model=List[Image])
 async def translate(
-    data: TranslateFramgement,
+    data: List[str],
     user_id: str = Depends(get_current_user_id),
     image_crud: ImageCrud = Depends(),
     is_subscribed: bool = Depends(subscription_validate),
 ) -> List[Image]:
     async with image_crud:
-        images = await image_crud.translate(data.images, user_id=user_id)
+        images = await image_crud.translate(data, user_id=user_id)
         return images

@@ -1,4 +1,3 @@
-import { signin, signup } from "api/auth";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
@@ -11,7 +10,7 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [username, setName] = useState("");
   const { startLoading, stopLoading } = useLoading();
-  const { auth, setAuth } = useAuth();
+  const { auth, setAuth, client, setApiKeyId } = useAuth();
   const navigate = useNavigate();
   const { addAlert } = useAlertQueue();
   useEffect(() => {
@@ -29,24 +28,31 @@ const LoginPage: React.FC = () => {
     if (isSignup) {
       // You can call your API for sign-up
       startLoading();
-      const user = await signup({ email, password, username });
-      setAuth(user);
-      if (user)
-        addAlert("Welcome! You have been successfully signed up!", "success");
-      else
-        addAlert(
-          "Sorry. The email or password have been exist already!",
-          "error",
-        );
+      const { data, error } = await client.POST("/signup", {
+        body: { username, email, password },
+      });
+      if (error?.detail) addAlert(error.detail.toString(), "error");
+      else {
+        if (data) {
+          setAuth(data);
+          setApiKeyId(data?.token);
+          addAlert("Welcome! You have been successfully signed up!", "success");
+        }
+      }
       stopLoading();
     } else {
       // You can call your API for login
       startLoading();
-      const user = await signin({ email, password });
-      setAuth(user);
-      if (user)
+      // const user = await signin({ email, password });
+      const { data, error } = await client.POST("/signin", {
+        body: { email, password },
+      });
+      if (error) addAlert(error.detail?.toString(), "error");
+      else {
+        setAuth(data);
+        setApiKeyId(data?.token);
         addAlert("Welcome! You have been successfully signed in!", "success");
-      else addAlert("Sorry. The email or password are invalid.", "error");
+      }
       stopLoading();
     }
   };

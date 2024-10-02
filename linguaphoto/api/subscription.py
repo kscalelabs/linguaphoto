@@ -1,7 +1,7 @@
 """Collection API."""
 
 import stripe
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from linguaphoto.crud.user import UserCrud
 from linguaphoto.settings import settings
@@ -17,6 +17,7 @@ price_id = settings.stripe_price_id
 
 @router.post("/create_subscription")
 async def subscribe(data: dict, user_id: str = Depends(get_current_user_id), user_crud: UserCrud = Depends()) -> dict:
+    print(settings.openai_key)
     try:
         # Create a customer if it doesn't exist
         customer = stripe.Customer.create(
@@ -43,4 +44,4 @@ async def subscribe(data: dict, user_id: str = Depends(get_current_user_id), use
         return {"success": True}
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return {"success": False, "error": str(e)}

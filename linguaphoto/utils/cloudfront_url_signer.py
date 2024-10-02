@@ -24,7 +24,7 @@ class CloudFrontUrlSigner:
         self.private_key_path = private_key_path
         self.cf_signer = CloudFrontSigner(key_id, self._rsa_signer)
 
-    def _rsa_signer(self, message: str) -> bytes:
+    def _rsa_signer(self, message: bytes) -> bytes:
         """RSA signer function that signs a message using the private key.
 
         :param message: The message to be signed.
@@ -33,7 +33,7 @@ class CloudFrontUrlSigner:
         with open(self.private_key_path, "r") as key_file:
             private_key = key_file.read()
         return rsa.sign(
-            message.encode("utf8"),  # Ensure message is in bytes
+            message,  # Ensure message is in bytes
             rsa.PrivateKey.load_pkcs1(private_key.encode("utf8")),
             "SHA-1",  # CloudFront requires SHA-1 hash
         )
