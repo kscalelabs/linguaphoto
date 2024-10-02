@@ -187,7 +187,9 @@ const CollectionPage: React.FC = () => {
       const asyncfunction = async () => {
         startLoading();
         collection.images = reorderImageIds;
-        const { error } = await client.POST("/edit_collection", { collection });
+        const { error } = await client.POST("/edit_collection", {
+          body: collection,
+        });
         if (error) addAlert(error.detail?.toString(), "error");
         else {
           setCollection({ ...collection });
