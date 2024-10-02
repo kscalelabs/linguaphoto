@@ -1596,7 +1596,11 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: Collection;
+    requestBody: {
+      content: {
+        "application/json": Collection;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
