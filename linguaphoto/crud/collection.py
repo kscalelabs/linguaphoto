@@ -25,3 +25,12 @@ class CollectionCrud(BaseCrud):
 
     async def delete_collection(self, collection_id: str) -> None:
         await self._delete_item(collection_id)
+
+    async def get_public_collections(self) -> List[Collection]:
+        collections = await self._list_items(
+            item_class=Collection,
+            filter_expression="#flag=:flag",
+            expression_attribute_names={"#flag": "publish_flag"},
+            expression_attribute_values={":flag": True},
+        )
+        return collections

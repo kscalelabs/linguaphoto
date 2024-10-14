@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { CaretLeft, CaretRight } from "react-bootstrap-icons";
 import {
   FaPause,
   FaPlay,
@@ -9,15 +10,22 @@ import {
 import { Image } from "types/model";
 
 interface AudioPlayerProps {
-  currentImage: Image;
-  index: number;
+  currentImage: Image; // current image
+  index: number; // current transcription index
+  handleTranscriptionNext: () => void; //next transcript
+  handleTranscriptionPrev: () => void; //prev transcript
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
+const AudioPlayer: React.FC<AudioPlayerProps> = ({
+  currentImage,
+  index,
+  handleTranscriptionNext,
+  handleTranscriptionPrev,
+}) => {
+  const audioRef = useRef<HTMLAudioElement>(null); //audio
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [volume, setVolume] = useState(1);
+  const [playbackRate, setPlaybackRate] = useState(1); //speed
+  const [volume, setVolume] = useState(1); // volumn size
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
@@ -82,13 +90,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
         setCurrentTime(0); // Reset current time to 0
       });
 
+      audio.addEventListener("ended", handleTranscriptionNext);
+
       // Clean up the event listeners on component unmount
       return () => {
         audio.removeEventListener("timeupdate", () => {});
         audio.removeEventListener("ended", () => {});
       };
     }
-  }, []);
+  }, [handleTranscriptionNext]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -98,7 +108,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
   }, [currentImage, index]);
 
   return (
-    <div className="mt-4 w-full text-center bg-gray-200 dark:bg-gray-600 px-4 py-1 rounded-md">
+    <div className="mt-2 w-full text-center bg-gray-12 px-4 py-1 rounded-md">
       <audio ref={audioRef}>
         <source
           src={currentImage.transcriptions[index].audio_url}
@@ -111,6 +121,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
       <div className="flex items-center justify-center mt-4 space-x-6">
         <div className="flex gap-3">
           <button
+            className={`flex-1 flex justify-center p-2 rounded-full ${
+              index === 0
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-gray-500 text-white hover:bg-gray-400"
+            }`}
+            onClick={handleTranscriptionPrev}
+            disabled={index === 0}
+          >
+            <CaretLeft />
+          </button>
+          <button
             onClick={togglePlayPause}
             className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
           >
@@ -122,6 +143,21 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ currentImage, index }) => {
             className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
           >
             <FaStop />
+          </button>
+          <button
+            className={`flex justify-center p-2 rounded-full ${
+              index === currentImage.transcriptions.length - 1 ||
+              currentImage.transcriptions.length === 0
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-gray-500 text-white hover:bg-gray-400"
+            }`}
+            onClick={handleTranscriptionNext}
+            disabled={
+              index === currentImage.transcriptions.length - 1 ||
+              currentImage.transcriptions.length === 0
+            }
+          >
+            <CaretRight />
           </button>
         </div>
         <div className="flex items-center">

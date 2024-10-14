@@ -7,22 +7,4 @@ export default class api {
   constructor(client: Client<paths>) {
     this.client = client;
   }
-
-  public async upload(files: File[], listing_id: string) {
-    return await this.client.POST("/artifacts/upload/{listing_id}", {
-      body: {
-        files: [],
-      },
-      params: {
-        path: {
-          listing_id,
-        },
-      },
-      bodySerializer() {
-        const fd = new FormData();
-        files.forEach((file) => fd.append("files", file));
-        return fd;
-      },
-    });
-  }
 }

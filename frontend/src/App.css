@@ -4,5 +4,93 @@
 @tailwind utilities;
 
 body {
-  font-family: "Noto Serif SC", serif; /* Use Noto Serif Simplified Chinese font */
+  font-family: "Noto Serif SC", serif;
+  /* Use Noto Serif Simplified Chinese font */
+}
+
+.perspective {
+  perspective: 1000px;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.group-hover\:rotate-y-30:hover,
+.rotate-y-30 {
+  transform: rotateY(-30deg);
+  /* Rotate the element on hover */
+}
+
+.rotate-y-90 {
+  transform: rotateY(-90deg) !important;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.rotate-left {
+  transform-origin: left;
+  /* Set transform origin to the left edge */
+}
+
+@layer base {
+  @layer base {
+    /* Global input customization */
+    input,
+    textarea,
+    select {
+      @apply border border-gray-300 rounded-lg px-4 py-2 bg-white text-black placeholder-gray-400 transition duration-200 ease-in-out;
+    }
+
+    /* Hover and focus states for inputs */
+    input:hover,
+    textarea:hover,
+    select:hover {
+      @apply border-gray-400;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      @apply border-blue-500 ring ring-blue-200 outline-none;
+    }
+
+    /* Disabled input */
+    input:disabled,
+    textarea:disabled,
+    select:disabled {
+      @apply bg-gray-200 cursor-not-allowed opacity-50;
+    }
+
+    /* Additional customization for textareas */
+    textarea {
+      @apply resize-none;
+      /* Prevents resizing */
+    }
+
+    /* Button styling */
+    button {
+      @apply bg-blue-500 text-white px-6 py-2 rounded-lg transition duration-200 ease-in-out;
+    }
+
+    /* Hover and focus states for buttons */
+    button:hover {
+      @apply bg-blue-600;
+    }
+
+    button:focus {
+      @apply ring ring-blue-300 outline-none;
+    }
+
+    /* Disabled button */
+    button:disabled {
+      @apply bg-gray-500 cursor-not-allowed opacity-50;
+    }
+  }
 }

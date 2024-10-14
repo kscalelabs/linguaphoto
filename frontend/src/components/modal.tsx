@@ -15,13 +15,13 @@ const Modal: FC<ModalProps> = ({ isOpen, onClose, children }) => {
       {/* Modal container */}
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-3xl w-full relative border border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
         {/* Close button in the top right corner */}
-        <button
-          className="absolute top-4 right-4 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200"
+        <div
+          className="absolute hover:bg-transparent top-6 right-8 text-gray-400 hover:text-red-400 transition-colors duration-200"
           onClick={onClose}
           aria-label="Close Modal"
         >
           <X size={28} /> {/* Close icon from react-bootstrap-icons */}
-        </button>
+        </div>
 
         {/* Modal content */}
         <div className="p-6">{children}</div>

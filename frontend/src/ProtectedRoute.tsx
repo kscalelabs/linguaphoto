@@ -11,20 +11,19 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   element,
   requiredSubscription = false,
 }) => {
-  const { auth } = useAuth();
+  const { auth, is_auth } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (auth)
-      if (!auth?.is_auth) {
-        // Redirect to login if not authenticated
-        navigate("/login", { replace: true, state: { from: location } });
-      } else if (requiredSubscription && !auth?.is_subscription) {
-        // Redirect to subscription page if subscription is required and not active
-        navigate("/subscription_type", { replace: true });
-      }
-  }, [auth, requiredSubscription, navigate, location]);
+    if (!is_auth) {
+      // Redirect to login if not authenticated
+      navigate("/login", { replace: true, state: { from: location } });
+    } else if (auth && requiredSubscription && !auth?.is_subscription) {
+      // Redirect to subscription page if subscription is required and not active
+      navigate("/subscription_type", { replace: true });
+    }
+  }, [auth, is_auth, requiredSubscription, navigate, location]);
 
   if (!auth?.is_auth || (requiredSubscription && !auth?.is_subscription)) {
     // Render nothing while redirecting

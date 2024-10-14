@@ -15,3 +15,9 @@ class CollectionEditFragment(BaseModel):
     title: Optional[str]
     description: Optional[str]
     images: Optional[List[str]]
+    featured_image: Optional[str]
+
+
+class CollectionPublishFragment(BaseModel):
+    id: str
+    flag: bool

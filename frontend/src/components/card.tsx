@@ -45,7 +45,7 @@ const CardItem: React.FC<CardItemProps> = (cardprops) => {
               Edit
             </button>
             <button
-              className="bg-red-700 text-white flex justify-content-center items-center w-8 h-8 rounded"
+              className="bg-red-700 text-white flex justify-center items-center w-8 h-8 rounded"
               onClick={handleDelete}
             >
               <TrashFill size={18} />
