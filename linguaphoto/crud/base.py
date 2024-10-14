@@ -255,7 +255,7 @@ class BaseCrud(AsyncContextManager):
         table = await self.db.Table(TABLE_NAME)
 
         query_params = {
-            "IndexName": "type_index",
+            "IndexName": "type-index",
             "KeyConditionExpression": Key("type").eq(item_class.__name__),
             "Limit": limit,
         }

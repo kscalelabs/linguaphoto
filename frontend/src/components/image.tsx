@@ -15,7 +15,6 @@ const ImageComponent: React.FC<ImageWithFunction> = ({
   id,
   is_translated,
   image_url,
-  transcriptions,
   handleTranslateOneImage,
   showDeleteModal,
 }) => {
@@ -30,11 +29,6 @@ const ImageComponent: React.FC<ImageWithFunction> = ({
             <div className="absolute top-2 right-2 flex items-center text-white bg-green-600 py-1 px-3 rounded text-xs">
               <CheckCircleFill size={15} className="mr-2" />
               <span>The image has been translated</span>
-            </div>
-            <div className="absolute bottom-2 text-white bg-gray-800 py-1 px-3 mx-2 rounded">
-              {transcriptions.map((transcription, index) => (
-                <span key={index}>{transcription.text}&nbsp;&nbsp;</span>
-              ))}
             </div>
           </>
         ) : (

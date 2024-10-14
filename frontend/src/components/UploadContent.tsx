@@ -80,12 +80,12 @@ const UploadContent: FC<UploadContentProps> = ({ onUpload }) => {
                       alt=""
                       className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-700"
                     />
-                    <button
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
+                    <span
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200 cursor-pointer"
                       onClick={() => onImageRemove(index)}
                     >
                       <XCircleFill size={24} />
-                    </button>
+                    </span>
                   </div>
                 ))
               ) : (

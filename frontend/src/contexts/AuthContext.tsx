@@ -17,6 +17,7 @@ interface AuthContextType {
       components["schemas"]["UserInfoResponseItem"] | undefined
     >
   >;
+  is_auth: boolean;
   setApiKeyId: React.Dispatch<React.SetStateAction<string | null>>;
   signout: () => void;
   apiKeyId: string | null;
@@ -40,6 +41,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuth] = useState<
     components["schemas"]["UserInfoResponseItem"] | undefined
   >(undefined);
+  const [is_auth, setIsAuth] = useState<boolean>(true);
   const [apiKeyId, setApiKeyId] = useState<string | null>(
     getLocalStorageAuth(),
   );
@@ -47,6 +49,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     setAuth(undefined);
     setApiKeyId("");
+    setIsAuth(false);
   };
   const client = useMemo(
     () =>
@@ -74,8 +77,9 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       const fetch_data = async () => {
         const { data, error } = await client.GET("/me");
         if (error) {
-          console.error("Failed to fetch current user", error);
+          signout();
         } else {
+          setIsAuth(true);
           setAuth(data);
           setApiKeyId(data.token);
         }
@@ -101,6 +105,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         auth,
+        is_auth,
         setAuth,
         signout,
         client,

@@ -5,7 +5,6 @@ import {
   useContext,
   useState,
 } from "react";
-import { Toast, ToastContainer } from "react-bootstrap";
 
 const DELAY = 5000;
 const MAX_ERRORS = 10;
@@ -15,13 +14,15 @@ type AlertType = "error" | "success" | "primary" | "info";
 const alertTypeToBg = (kind: AlertType) => {
   switch (kind) {
     case "error":
-      return "danger";
+      return "bg-red-500 text-white"; // Tailwind-style classes
     case "success":
-      return "success";
+      return "bg-green-500 text-white";
     case "primary":
-      return "primary";
+      return "bg-blue-500 text-white";
     case "info":
-      return "secondary";
+      return "bg-gray-500 text-white";
+    default:
+      return "bg-gray-500 text-white";
   }
 };
 
@@ -52,9 +53,9 @@ export const AlertQueueProvider = (props: AlertQueueProviderProps) => {
 
   const addAlert = useCallback(
     (alert: string | ReactNode, kind: AlertType) => {
+      const alertId = generateAlertId();
       setAlerts((prev) => {
         const newAlerts = new Map(prev);
-        const alertId = generateAlertId();
         newAlerts.set(alertId, [alert, kind]);
 
         // Ensure the map doesn't exceed MAX_ERRORS
@@ -65,6 +66,10 @@ export const AlertQueueProvider = (props: AlertQueueProviderProps) => {
 
         return newAlerts;
       });
+      // Automatically remove the alert after DELAY
+      setTimeout(() => {
+        removeAlert(alertId);
+      }, DELAY);
     },
     [generateAlertId],
   );
@@ -93,7 +98,7 @@ export const AlertQueueProvider = (props: AlertQueueProviderProps) => {
 export const useAlertQueue = () => {
   const context = useContext(AlertQueueContext);
   if (context === undefined) {
-    throw new Error("useAlertQueue must be used within a ErrorQueueProvider");
+    throw new Error("useAlertQueue must be used within an AlertQueueProvider");
   }
   return context;
 };
@@ -109,31 +114,45 @@ export const AlertQueue = (props: AlertQueueProps) => {
   return (
     <>
       {children}
-      <ToastContainer
-        className="p-3 mb-8"
-        position="bottom-center"
-        style={{ zIndex: 1000, position: "fixed" }}
+      <div
+        className="fixed bottom-0 left-0 right-0 flex flex-col items-center space-y-2 p-4"
+        style={{ zIndex: 1000 }}
       >
-        {Array.from(alerts).map(([alertId, [alert, kind]]) => {
-          return (
-            <Toast
-              key={alertId}
-              bg={alertTypeToBg(kind)}
-              autohide
-              delay={DELAY}
-              onClose={() => removeAlert(alertId)}
-              animation={true}
-            >
-              <Toast.Header>
-                <strong className="me-auto">
-                  {kind.charAt(0).toUpperCase() + kind.slice(1)}
-                </strong>
-              </Toast.Header>
-              <Toast.Body>{alert}</Toast.Body>
-            </Toast>
-          );
-        })}
-      </ToastContainer>
+        {Array.from(alerts).map(([alertId, [alert, kind]]) => (
+          <div
+            key={alertId}
+            className={`w-full max-w-xs p-4 rounded shadow-lg ${alertTypeToBg(
+              kind,
+            )}`}
+            style={{ animation: "fadeIn 0.5s ease-in-out" }}
+          >
+            <div className="flex justify-between items-center">
+              <strong className="capitalize">{kind}</strong>
+              <div
+                onClick={() => removeAlert(alertId)}
+                className="ml-2 text-white hover:text-gray-200 cursor-pointer"
+              >
+                &times;
+              </div>
+            </div>
+            <div className="mt-2">{alert}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Remove the jsx attribute */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </>
   );
 };

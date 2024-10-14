@@ -1,45 +1,103 @@
-import avatar from "assets/avatar.png";
-import { Col, Container, Row } from "react-bootstrap";
+import Book from "components/Book";
+import BookSkeleton from "components/BookSkeleton";
+import { useAuth } from "contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { Collection } from "types/model";
 
 const Home = () => {
+  const [public_collections, setPublicCollections] = useState<
+    Array<Collection> | undefined
+  >([]);
+  const [collections, setCollections] = useState<Array<Collection> | undefined>(
+    [],
+  );
+  const { auth, client } = useAuth();
+  const [is_collection_roading, setIsCollectionRoading] =
+    useState<boolean>(true);
+  const [is_public_collection_roading, setIsPublicCollectionRoading] =
+    useState<boolean>(true);
+  useEffect(() => {
+    (async () => {
+      const { data } = await client.GET("/public_collections");
+      setPublicCollections(data);
+      setIsPublicCollectionRoading(false);
+    })();
+  }, [client]);
+  useEffect(() => {
+    if (auth?.is_auth)
+      (async () => {
+        const { data } = await client.GET("/get_collections");
+        setCollections(data);
+        setIsCollectionRoading(false);
+      })();
+  }, [client, auth]);
   return (
-    <Container
-      fluid
-      className="d-flex flex-column justify-content-center align-items-center min-vh-100"
-    >
-      <Row className="align-items-center w-100">
+    <div className="flex flex-col gap-2 h-full">
+      <div className="flex flex-wrap rounded-md items-center bg-gray-12 px-4">
         {/* Text Section */}
-        <Col
-          lg={4}
-          md={8}
-          sm={12}
-          className="text-center text-md-start d-flex flex-column justify-content-center"
-        >
-          <h1 className="display-4">LinguaPhoto</h1>
-          <p className="lead">Visual language learning for everyone!</p>
-          <Row className="mt-3">{/* GoogleAuthComponent placeholder */}</Row>
-        </Col>
-
-        {/* Image Section */}
-        <Col
-          lg={8}
-          md={8}
-          sm={12}
-          className="d-flex justify-content-center align-items-center"
-        >
-          <img
-            src={avatar}
-            alt="Avatar"
-            className="img-fluid"
-            style={{
-              maxHeight: "80vh", // Keeps image height responsive
-              maxWidth: "100%",
-              objectFit: "contain", // Prevents overflow
-            }}
-          />
-        </Col>
-      </Row>
-    </Container>
+        <div className="flex flex-col justify-center items-center text-md-start h-72 text-3xl w-full">
+          <h1>LinguaPhoto</h1>
+          <p>Visual language learning for everyone!</p>
+          <div className="flex felx-wrap mt-3">
+            {/* GoogleAuthComponent placeholder */}
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col rounded-md items-start bg-gray-3 p-24 gap-8">
+        <h1 className="text-3xl text-gray-900">Public Collections</h1>
+        <div className="w-full flex flex-wrap gap-8">
+          {is_public_collection_roading ? (
+            // skeleton for public collections
+            <BookSkeleton is_light={true} />
+          ) : (
+            public_collections?.map((collection) => {
+              return (
+                <div
+                  key={collection.id}
+                  className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 2xl:w-1/6"
+                >
+                  <Book
+                    title={collection.title}
+                    description={collection.title}
+                    id={collection.id}
+                    featured_image={collection.featured_image}
+                  />
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+      {auth?.is_auth ? (
+        <div className="flex flex-col rounded-md items-start bg-gray-12 p-24 gap-8">
+          <h1 className="text-3xl">My Collections</h1>
+          <div className="w-full flex flex-wrap gap-8">
+            {is_collection_roading ? (
+              // skeleton for my collections
+              <BookSkeleton is_light={false} />
+            ) : (
+              collections?.map((collection) => {
+                return (
+                  <div
+                    key={collection.id}
+                    className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 2xl:w-1/6"
+                  >
+                    <Book
+                      title={collection.title}
+                      description={collection.title}
+                      id={collection.id}
+                      featured_image={collection.featured_image}
+                    />
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
+    </div>
   );
 };
 

@@ -3,6 +3,9 @@ export interface Collection {
   title: string;
   description: string;
   images: Array<string>;
+  user: string;
+  featured_image: string;
+  publish_flag: boolean;
 }
 
 interface Transcription {

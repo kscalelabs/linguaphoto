@@ -1,11 +1,11 @@
-import CardItem from "components/card";
+import Book from "components/Book";
+import BookSkeleton from "components/BookSkeleton";
 import Modal from "components/modal";
 import NewCardItem from "components/new_card";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
 import { useEffect, useState } from "react";
-import { Col, Row } from "react-bootstrap";
 import { Collection } from "types/model";
 
 const Collections = () => {
@@ -15,6 +15,7 @@ const Collections = () => {
   const { startLoading, stopLoading } = useLoading();
   const [delete_ID, setDeleteID] = useState(String);
   const { addAlert } = useAlertQueue();
+  const [is_loading, setIsLoading] = useState<boolean>(true);
   const onDeleteModalShow = (id: string) => {
     setDeleteID(id);
     setShowModal(true);
@@ -41,32 +42,51 @@ const Collections = () => {
   useEffect(() => {
     if (auth?.is_auth) {
       const asyncfunction = async () => {
-        startLoading();
         const { data: collections, error } =
           await client.GET("/get_collections");
         if (error) addAlert(error.detail?.toString(), "error");
         else setCollection(collections);
-        stopLoading();
+        setIsLoading(false);
       };
       asyncfunction();
     }
   }, [auth]);
 
   return (
-    <div className="flex-column pt-20 gap-4 d-flex justify-content-center">
-      <h1>My Collections</h1>
-      <Row className="align-items-center">
-        <Col lg={3} md={4} sm={12}>
-          <NewCardItem />
-        </Col>
-        {collections?.map((collection) => {
-          return (
-            <Col lg={3} md={4} sm={12} key={collection.id}>
-              <CardItem {...collection} onDelete={onDeleteModalShow} />
-            </Col>
-          );
-        })}
-      </Row>
+    <div className="flex-column rounded-md min-h-full items-center bg-gray-3 p-3">
+      {auth?.is_auth ? (
+        <div className="flex flex-col rounded-md items-start p-24 gap-8">
+          <h1 className="text-3xl text-gray-900">My Collections</h1>
+          <div className="w-full flex flex-wrap gap-8">
+            <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 2xl:w-1/6">
+              <NewCardItem />
+            </div>
+            {is_loading ? (
+              <BookSkeleton is_light={true} />
+            ) : (
+              collections?.map((collection) => {
+                return (
+                  <div
+                    key={collection.id}
+                    className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 2xl:w-1/6"
+                  >
+                    <Book
+                      title={collection.title}
+                      description={collection.title}
+                      id={collection.id}
+                      featured_image={collection.featured_image}
+                      is_editable={true}
+                      onDelete={onDeleteModalShow}
+                    />
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
       {/* Delete Modal */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <div className="mt-5 flex justify-end space-x-2 gap-4 items-center">

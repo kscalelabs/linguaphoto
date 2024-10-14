@@ -10,6 +10,7 @@ from linguaphoto.models import Collection
 from linguaphoto.schemas.collection import (
     CollectionCreateFragment,
     CollectionEditFragment,
+    CollectionPublishFragment,
 )
 from linguaphoto.utils.auth import get_current_user_id
 
@@ -64,7 +65,12 @@ async def editcollection(
     async with collection_crud:
         await collection_crud.edit_collection(
             collection.id,
-            updates={"title": collection.title, "description": collection.description, "images": collection.images},
+            updates={
+                "title": collection.title,
+                "description": collection.description,
+                "images": collection.images,
+                "featured_image": collection.featured_image,
+            },
         )
         return
 
@@ -78,3 +84,23 @@ async def deletecollection(
     async with collection_crud:
         await collection_crud.delete_collection(collection_id=id)
         return
+
+
+@router.post("/publish_collection")
+async def publishcollection(
+    data: CollectionPublishFragment,
+    user_id: str = Depends(get_current_user_id),
+    collection_crud: CollectionCrud = Depends(),
+) -> None:
+    async with collection_crud:
+        await collection_crud.edit_collection(data.id, updates={"publish_flag": data.flag})
+        return
+
+
+@router.get("/public_collections")
+async def publiccoleections(
+    collection_crud: CollectionCrud = Depends(),
+) -> List[Collection]:
+    async with collection_crud:
+        collections = await collection_crud.get_public_collections()
+        return collections

@@ -21,7 +21,7 @@ const COLORS: { [key in Theme]: ThemeColors } = {
     color: "#201a42",
   },
   dark: {
-    backgroundColor: "#000000",
+    backgroundColor: "#ffffff",
     color: "#f5f2ef",
   },
 };

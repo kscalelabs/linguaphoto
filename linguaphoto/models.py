@@ -58,6 +58,8 @@ class Collection(LinguaBaseModel):
     description: str
     images: List[str] = []
     user: str
+    featured_image: str = ""
+    publish_flag: bool = False
 
     @classmethod
     def create(cls, title: str, description: str, user_id: str) -> Self:

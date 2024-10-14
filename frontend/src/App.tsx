@@ -1,6 +1,6 @@
-import "bootstrap/dist/css/bootstrap.min.css";
+import Content from "components/HOC/Content";
 import LoadingMask from "components/LoadingMask";
-import TopNavbar from "components/nav/TopNavbar";
+import Navbar from "components/nav/Navbar";
 import NotFoundRedirect from "components/NotFoundRedirect";
 import { AuthProvider } from "contexts/AuthContext";
 import { LoadingProvider } from "contexts/LoadingContext";
@@ -14,7 +14,6 @@ import NotFound from "pages/NotFound";
 import SubscriptionTypePage from "pages/SubscriptioinType";
 import SubscriptionCancelPage from "pages/Subscription";
 import PrivateRoute from "ProtectedRoute";
-import { Container } from "react-bootstrap";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 
@@ -26,7 +25,7 @@ const App = () => {
           <AuthProvider>
             <AlertQueueProvider>
               <AlertQueue>
-                <Container>
+                <Content>
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/404" element={<NotFound />} />
@@ -82,8 +81,9 @@ const App = () => {
                     />
                     <Route path="*" element={<NotFoundRedirect />} />
                   </Routes>
-                </Container>
-                <TopNavbar />
+                </Content>
+                <Navbar />
+                {/* <TopNavbar /> */}
               </AlertQueue>
             </AlertQueueProvider>
           </AuthProvider>

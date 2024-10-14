@@ -10,12 +10,12 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [username, setName] = useState("");
   const { startLoading, stopLoading } = useLoading();
-  const { auth, setAuth, client, setApiKeyId } = useAuth();
+  const { auth, is_auth, setAuth, client, setApiKeyId } = useAuth();
   const navigate = useNavigate();
   const { addAlert } = useAlertQueue();
   useEffect(() => {
-    if (auth?.is_auth) navigate("/collections");
-  }, [auth]);
+    if (is_auth && auth?.is_auth) navigate("/collections");
+  }, [is_auth, auth?.is_auth]);
   // Toggle between login and signup forms
   const handleSwitch = () => {
     setIsSignup(!isSignup);
@@ -58,9 +58,9 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="border rounded-lg shadow-md p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">
+    <div className="flex flex-wrap rounded-md h-full items-center justify-center bg-gray-3">
+      <div className="border border-gray-600 rounded-lg shadow-md p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-gray-700 mb-4 text-center">
           {isSignup ? "Sign Up" : "Login"}
         </h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -128,7 +128,7 @@ const LoginPage: React.FC = () => {
           <hr className="flex-grow border-t border-gray-300" />
         </div>
 
-        <button className="bg-gray-800 text-white p-2 rounded w-full flex items-center justify-center hover:bg-gray-900">
+        <button className="bg-gray-11 text-white p-2 rounded w-full hover:bg-gray-10 flex flex-wrap items-center justify-center">
           <Google className="mr-2" size={20} />
           {isSignup ? "Sign Up with Google" : "Login with Google"}
         </button>
@@ -137,22 +137,22 @@ const LoginPage: React.FC = () => {
           {isSignup ? (
             <>
               Already have an account?{" "}
-              <button
+              <span
                 onClick={handleSwitch}
-                className="text-blue-500 hover:underline"
+                className="text-blue-500 hover:underline cursor-pointer"
               >
                 Login here
-              </button>
+              </span>
             </>
           ) : (
             <>
               Don&apos;t have an account?{" "}
-              <button
+              <span
                 onClick={handleSwitch}
-                className="text-blue-500 hover:underline"
+                className="text-blue-500 hover:underline cursor-pointer"
               >
                 Create a new account
-              </button>
+              </span>
             </>
           )}
         </p>
