@@ -14,7 +14,7 @@ interface Transcription {
   translation: string;
   audio_url: string;
 }
-export interface Image {
+export interface ImageType {
   id: string;
   is_translated: boolean;
   collection: string;

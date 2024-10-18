@@ -71,6 +71,12 @@ class ImageCrud(BaseCrud):
 
     async def get_images(self, collection_id: str, user_id: str) -> List[Image]:
         images = await self._get_items_from_secondary_index("user", user_id, Image, Key("collection").eq(collection_id))
+        images = await self._list_items(
+            item_class=Image,
+            filter_expression="#collection=:collection",
+            expression_attribute_names={"#collection": "collection"},
+            expression_attribute_values={":collection": collection_id},
+        )
         return images
 
     async def get_image(self, image_id: str) -> Image | None:
@@ -81,40 +87,36 @@ class ImageCrud(BaseCrud):
         await self._delete_item(image_id)
 
     # Translates the images to text and synthesizes audio for the transcriptions
-    async def translate(self, images: List[str], user_id: str) -> List[Image]:
-        image_instances = []
-        for id in images:
-            # Retrieve image metadata and download the image content
-            image_instance = await self._get_item(id, Image, True)
-            if image_instance is None:
-                continue
-            response = requests.get(image_instance.image_url)
-            if response.status_code == 200:
-                img_source = BytesIO(response.content)
-                # Initialize OpenAI client for transcription and speech synthesis
-                client = AsyncOpenAI(api_key=settings.openai_key)
-                transcription_response = await transcribe_image(img_source, client)
-                # Process each transcription and generate corresponding audio
-                for i, transcription in enumerate(transcription_response.transcriptions):
-                    audio_buffer = BytesIO()
-                    text = transcription.text
-                    # Synthesize text and write the chunks directly into the in-memory buffer
-                    async for chunk in await synthesize_text(text, client):
-                        audio_buffer.write(chunk)
-                    # Set buffer position to the start
-                    audio_buffer.seek(0)
-                    audio_url = await self.create_audio(audio_buffer)
-                    if audio_url is None:
-                        continue
-                    # Attach the audio URL to the transcription
-                    transcription.audio_url = audio_url
-                image_instance.transcriptions = transcription_response.transcriptions
-                image_instance.is_translated = True
-                await self._update_item(
-                    id,
-                    Image,
-                    {"transcriptions": transcription_response.model_dump()["transcriptions"], "is_translated": True},
-                )
-            if image_instance:
-                image_instances.append(image_instance)
-        return image_instances
+    async def translate(self, image_id: str, user_id: str) -> Image:
+        # Retrieve image metadata and download the image content
+        image_instance = await self._get_item(image_id, Image, True)
+        if image_instance is None:
+            raise ItemNotFoundError
+        response = requests.get(image_instance.image_url)
+        if response.status_code == 200:
+            img_source = BytesIO(response.content)
+            # Initialize OpenAI client for transcription and speech synthesis
+            client = AsyncOpenAI(api_key=settings.openai_key)
+            transcription_response = await transcribe_image(img_source, client)
+            # Process each transcription and generate corresponding audio
+            for i, transcription in enumerate(transcription_response.transcriptions):
+                audio_buffer = BytesIO()
+                text = transcription.text
+                # Synthesize text and write the chunks directly into the in-memory buffer
+                async for chunk in await synthesize_text(text, client):
+                    audio_buffer.write(chunk)
+                # Set buffer position to the start
+                audio_buffer.seek(0)
+                audio_url = await self.create_audio(audio_buffer)
+                if audio_url is None:
+                    continue
+                # Attach the audio URL to the transcription
+                transcription.audio_url = audio_url
+            image_instance.transcriptions = transcription_response.transcriptions
+            image_instance.is_translated = True
+            await self._update_item(
+                image_id,
+                Image,
+                {"transcriptions": transcription_response.model_dump()["transcriptions"], "is_translated": True},
+            )
+        return image_instance

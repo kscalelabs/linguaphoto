@@ -81,7 +81,7 @@ const CheckoutForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center gap-8 p-8 w-full max-w-md mx-auto border dark:border-white rounded"
+      className="flex flex-col items-center gap-8 p-8 w-full max-w-md mx-auto rounded-lg bg-gray-12"
     >
       <h1 className="text-xl font-bold mb-4">Subscribe</h1>
 
@@ -149,7 +149,7 @@ const CheckoutForm = () => {
 
 const SubscriptionPage = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-full p-4">
+    <div className="flex flex-col rounded-md h-full items-center justify-center bg-gray-3 p-24 gap-12">
       <Elements stripe={stripePromise}>
         <CheckoutForm />
       </Elements>

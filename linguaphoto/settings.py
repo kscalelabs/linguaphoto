@@ -28,7 +28,7 @@ class Settings:
     openai_key = os.getenv("OPENAI_API_KEY")
     stripe_key = os.getenv("STRIPE_API_KEY")
     stripe_price_id = os.getenv("STRIPE_PRODUCT_PRICE_ID", "price_1Q0ZaMKeTo38dsfeSWRDGCEf")
-    homepage_url = os.getenv("HOMEPAGE_URL", "")
+    homepage_url = os.getenv("HOMEPAGE_URL", "http://localhost:3000")
 
 
 settings = Settings()

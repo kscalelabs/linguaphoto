@@ -21,3 +21,8 @@ class CollectionEditFragment(BaseModel):
 class CollectionPublishFragment(BaseModel):
     id: str
     flag: bool
+
+
+class FeaturedImageFragnment(BaseModel):
+    image_url: str
+    collection_id: str

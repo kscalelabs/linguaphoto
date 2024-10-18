@@ -39,9 +39,9 @@ const Book: React.FC<BookProps> = ({
       {/* Second page */}
       <div className="absolute top-0 w-full h-full bg-gray-100 shadow-lg rounded-sm">
         <div className="p-4 flex flex-col justify-between items-center text-gray-700 text-center h-full">
-          <div>
-            <h2 className="text-lg font-bold mb-2">{title}</h2>
-            <p className="text-sm line-clamp-5">{description}</p>
+          <div className="w-full">
+            <h2 className="text-lg font-bold mb-2 line-clamp-2">{title}</h2>
+            <p className="text-sm line-clamp-5 line-clamp-3">{description}</p>
           </div>
           {is_editable ? (
             <div className="flex flex-col gap-2">
@@ -74,8 +74,8 @@ const Book: React.FC<BookProps> = ({
               alt={title}
               className="object-cover w-full h-full rounded-sm"
             />
-            <div className="absolute top-4 bg-gray-12/70 mt-7 mx-5 p-2 max-h-52 overflow-hidden">
-              <h2 className="text-md text-center">{title}</h2>
+            <div className="absolute max-w-40 top-4 bg-gray-12/60 mt-7 p-2 max-h-52 rounded-md">
+              <h2 className="text-md text-center line-clamp-2">{title}</h2>
             </div>
           </div>
         </div>

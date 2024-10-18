@@ -7,10 +7,10 @@ import {
   FaVolumeDown,
   FaVolumeUp,
 } from "react-icons/fa";
-import { Image } from "types/model";
+import { ImageType } from "types/model";
 
 interface AudioPlayerProps {
-  currentImage: Image; // current image
+  currentImage: ImageType; // current image
   index: number; // current transcription index
   handleTranscriptionNext: () => void; //next transcript
   handleTranscriptionPrev: () => void; //prev transcript

@@ -27,7 +27,7 @@ const SidebarItem = ({
 }: SidebarItemProps) => {
   return (
     <li>
-      <button onClick={onClick} className="w-full focus:outline-none">
+      <div onClick={onClick} className="w-full cursor-pointer p-2">
         <span className="flex items-center py-2 px-4 text-gray-900 rounded-lg dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 group">
           {align === "right" ? (
             <>
@@ -58,7 +58,7 @@ const SidebarItem = ({
             </>
           )}
         </span>
-      </button>
+      </div>
     </li>
   );
 };
@@ -108,7 +108,7 @@ const Sidebar = ({ show, onClose }: SidebarProps) => {
               />
               {auth?.is_auth ? (
                 <SidebarItem
-                  title="Collections"
+                  title="MyCollections"
                   icon={<FaThList />}
                   onClick={() => {
                     navigate("/collections");

@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+}
+
 body {
   font-family: "Noto Serif SC", serif;
   /* Use Noto Serif Simplified Chinese font */
@@ -81,7 +85,7 @@ body {
 
     /* Hover and focus states for buttons */
     button:hover {
-      @apply bg-blue-600;
+      @apply opacity-80;
     }
 
     button:focus {

@@ -27,7 +27,8 @@ const COLORS: { [key in Theme]: ThemeColors } = {
 };
 
 const getThemeFromLocalStorage = (): Theme => {
-  const theme = localStorage.getItem(THEME_KEY);
+  // const theme = localStorage.getItem(THEME_KEY); //now light mode disable
+  const theme = "dark";
   if (theme === null) {
     return "dark";
   }
@@ -59,6 +60,26 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
     setTheme(theme);
     setThemeWithLocalStorage(theme);
   };
+
+  const scrollSpeed = 10; // Increase this value to make scrolling faster
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault(); // Prevent default scroll behavior
+      window.scrollBy({
+        top: event.deltaY * scrollSpeed, // Multiply the scroll amount
+        left: 0,
+        behavior: "smooth", // Use smooth scrolling
+      });
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, []); // Empty dependency array ensures this runs only on mount and unmount
 
   useEffect(() => {
     document.body.setAttribute("data-bs-theme", theme);

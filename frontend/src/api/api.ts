@@ -1,5 +1,5 @@
 import { AxiosInstance } from "axios";
-import { Collection, Image } from "types/model";
+import { Collection, ImageType } from "types/model";
 
 export interface CollectionCreateFragment {
   title: string;
@@ -22,7 +22,7 @@ export class Api {
     const response = await this.api.get(`/`);
     return response.data.message;
   }
-  public async handleUpload(formData: FormData): Promise<Image | null> {
+  public async handleUpload(formData: FormData): Promise<ImageType | null> {
     try {
       const response = await this.api.post("/upload/", formData, {
         headers: {
@@ -61,20 +61,25 @@ export class Api {
     await this.api.get(`/delete_image?id=${image_id}`);
     return null;
   }
-  public async uploadImage(file: File, collection_id: string): Promise<Image> {
+  public async uploadImage(
+    file: File,
+    collection_id: string,
+  ): Promise<ImageType> {
     const response = await this.api.post("/upload", {
       file,
       id: collection_id,
     });
     return response.data;
   }
-  public async getImages(collection_id: string): Promise<Array<Image>> {
+  public async getImages(collection_id: string): Promise<Array<ImageType>> {
     const response = await this.api.get(
       `/get_images?collection_id=${collection_id}`,
     );
     return response.data;
   }
-  public async translateImages(images: Array<string>): Promise<Array<Image>> {
+  public async translateImages(
+    images: Array<string>,
+  ): Promise<Array<ImageType>> {
     const response = await this.api.post("/translate", images, {
       timeout: 300000,
     });

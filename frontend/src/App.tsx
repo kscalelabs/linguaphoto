@@ -4,6 +4,7 @@ import Navbar from "components/nav/Navbar";
 import NotFoundRedirect from "components/NotFoundRedirect";
 import { AuthProvider } from "contexts/AuthContext";
 import { LoadingProvider } from "contexts/LoadingContext";
+import { SocketProvider } from "contexts/SocketContext";
 import { AlertQueue, AlertQueueProvider } from "hooks/alerts";
 import { ThemeProvider } from "hooks/theme";
 import CollectionPage from "pages/Collection";
@@ -23,69 +24,71 @@ const App = () => {
       <ThemeProvider>
         <LoadingProvider>
           <AuthProvider>
-            <AlertQueueProvider>
-              <AlertQueue>
-                <Content>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/404" element={<NotFound />} />
-                    <Route
-                      path="/collections"
-                      element={
-                        <PrivateRoute
-                          element={<Collections />}
-                          requiredSubscription={true} // Set true if subscription is required for this route
-                        />
-                      }
-                    />
-                    <Route
-                      path="/collection"
-                      element={
-                        <PrivateRoute
-                          element={<CollectionPage />}
-                          requiredSubscription={true} // Set true if subscription is required for this route
-                        />
-                      }
-                    />
-                    <Route
-                      path="/collection/new"
-                      element={
-                        <PrivateRoute
-                          element={<CollectionPage />}
-                          requiredSubscription={true} // Set true if subscription is required for this route
-                        />
-                      }
-                    />
-                    <Route
-                      path="/collection/:id"
-                      element={
-                        <PrivateRoute
-                          element={<CollectionPage />}
-                          requiredSubscription={true} // Set true if subscription is required for this route
-                        />
-                      }
-                    />
-                    <Route
-                      path="/subscription"
-                      element={
-                        <PrivateRoute
-                          element={<SubscriptionCancelPage />}
-                          requiredSubscription={true} // Set true if subscription is required for this route
-                        />
-                      }
-                    />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route
-                      path="/subscription_type"
-                      element={<SubscriptionTypePage />}
-                    />
-                    <Route path="*" element={<NotFoundRedirect />} />
-                  </Routes>
-                </Content>
-                <Navbar />
-                {/* <TopNavbar /> */}
-              </AlertQueue>
-            </AlertQueueProvider>
+            <SocketProvider>
+              <AlertQueueProvider>
+                <AlertQueue>
+                  <Content>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/404" element={<NotFound />} />
+                      <Route
+                        path="/collections"
+                        element={
+                          <PrivateRoute
+                            element={<Collections />}
+                            requiredSubscription={true} // Set true if subscription is required for this route
+                          />
+                        }
+                      />
+                      <Route
+                        path="/collection"
+                        element={
+                          <PrivateRoute
+                            element={<CollectionPage />}
+                            requiredSubscription={true} // Set true if subscription is required for this route
+                          />
+                        }
+                      />
+                      <Route
+                        path="/collection/new"
+                        element={
+                          <PrivateRoute
+                            element={<CollectionPage />}
+                            requiredSubscription={true} // Set true if subscription is required for this route
+                          />
+                        }
+                      />
+                      <Route
+                        path="/collection/:id"
+                        element={
+                          <PrivateRoute
+                            element={<CollectionPage />}
+                            requiredSubscription={true} // Set true if subscription is required for this route
+                          />
+                        }
+                      />
+                      <Route
+                        path="/subscription"
+                        element={
+                          <PrivateRoute
+                            element={<SubscriptionCancelPage />}
+                            requiredSubscription={true} // Set true if subscription is required for this route
+                          />
+                        }
+                      />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route
+                        path="/subscription_type"
+                        element={<SubscriptionTypePage />}
+                      />
+                      <Route path="*" element={<NotFoundRedirect />} />
+                    </Routes>
+                  </Content>
+                  <Navbar />
+                  {/* <TopNavbar /> */}
+                </AlertQueue>
+              </AlertQueueProvider>
+            </SocketProvider>
           </AuthProvider>
           <LoadingMask />
         </LoadingProvider>
