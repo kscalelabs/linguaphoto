@@ -21,7 +21,6 @@ app.add_middleware(
 
 app.include_router(router, prefix="")
 
-app = ASGIApp(sio, app)
 if __name__ == "__main__":
     print("Starting webserver...")
     uvicorn.run(app, port=8080, host="0.0.0.0")
