@@ -40,4 +40,4 @@ openai
 
 requests
 stripe
-python-socketio[asgi]==5.6.0
+python-socketio[asyncio]
