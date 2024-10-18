@@ -85,6 +85,7 @@ async def deletecollection(
         await collection_crud.delete_collection(collection_id=id)
         return
 
+
 @router.post("/set_featured_image", response_model=None)
 async def setfeaturedimage(
     data: FeaturedImageFragnment,
@@ -94,6 +95,7 @@ async def setfeaturedimage(
     async with collection_crud:
         await collection_crud.edit_collection(data.collection_id, updates={"featured_image": data.image_url})
         return
+
 
 @router.post("/publish_collection")
 async def publishcollection(

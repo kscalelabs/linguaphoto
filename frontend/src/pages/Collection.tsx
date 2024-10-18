@@ -2,6 +2,7 @@ import CollectionEdit from "components/collection/Edit";
 import CollectionNew from "components/collection/New";
 import CollectionView from "components/collection/View";
 import { useAuth } from "contexts/AuthContext";
+import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -33,6 +34,7 @@ const CollectionPage: React.FC = () => {
         );
         if (error) addAlert(error.detail?.toString(), "error");
         else setCollection(collection);
+        stopLoading();
       };
       asyncfunction();
     }
