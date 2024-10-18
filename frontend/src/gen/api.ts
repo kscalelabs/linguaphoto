@@ -11,7 +11,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    get: operations["delete_collections"];
     put?: never;
     post: operations["translate"];
     /** Delete Artifact */
@@ -28,7 +28,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    get: operations["public_collections"];
     put?: never;
     post: operations["set_featured_image"];
     /** Delete Artifact */

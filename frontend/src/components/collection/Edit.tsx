@@ -204,7 +204,6 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
     }
     // Optionally, you can save the new order to your backend here
   };
-
   return (
     <div className="flex flex-col rounded-md min-h-full bg-gray-3 p-24 gap-8">
       <h1 className="text-3xl text-gray-900">Edit Collection </h1>
