@@ -50,6 +50,7 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
         });
         if (error) addAlert(error.detail?.toString(), "error");
         else setImages(images);
+        setIsLoading(false);
       };
       fetchImages();
     }
@@ -62,7 +63,6 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
           if (image) await preloadImage(image.image_url);
         }
         setCurrentImage(translatedImages[currentImageIndex]);
-        setIsLoading(false);
       }
     };
 
@@ -138,67 +138,69 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
           <div className="bg-gray-3 w-full rounded-lg h-3/4 animate-pulse" />
           <div className="bg-gray-3 w-full rounded-lg h-1/4 animate-pulse" />
         </div>
-      ) : currentImage ? (
-        <div className="flex flex-col align-items-center w-full">
-          <div className="w-full absolute left-0">
-            <img
-              draggable="false"
-              src={currentImage.image_url}
-              alt="Collection Image"
-              className="w-full select-none"
-              style={{ marginBottom: "230px" }}
-              onClick={handlePhotoClick}
-            />
+      ) : translatedImages ? (
+        currentImage && (
+          <div className="flex flex-col align-items-center w-full">
+            <div className="w-full absolute left-0">
+              <img
+                draggable="false"
+                src={currentImage.image_url}
+                alt="Collection Image"
+                className="w-full select-none"
+                style={{ marginBottom: "230px" }}
+                onClick={handlePhotoClick}
+              />
+            </div>
+            <div className="fixed bottom-0 left-0 w-full px-4 py-1 text-center bg-gray-1/30 backdrop-blur-lg">
+              <Container>
+                <div className="rounded-md bg-gray-12 p-2">
+                  {currentImage.transcriptions.length != 0 ? (
+                    <>
+                      <p className="mt-2 px-12">
+                        {currentImage.transcriptions.map(
+                          (transcription, index) => {
+                            return (
+                              <span
+                                key={index}
+                                className={
+                                  index === currentTranscriptionIndex
+                                    ? ""
+                                    : "text-gray-400"
+                                }
+                              >
+                                {transcription.text}
+                              </span>
+                            );
+                          },
+                        )}
+                      </p>
+                      <p className="mt-2">
+                        {
+                          currentImage.transcriptions[currentTranscriptionIndex]
+                            .pinyin
+                        }
+                      </p>
+                      <p className="mt-2">
+                        {
+                          currentImage.transcriptions[currentTranscriptionIndex]
+                            .translation
+                        }
+                      </p>
+                      <AudioPlayer
+                        currentImage={currentImage}
+                        index={currentTranscriptionIndex}
+                        handleTranscriptionNext={handleTranscriptionNext}
+                        handleTranscriptionPrev={handleTranscriptionPrev}
+                      />
+                    </>
+                  ) : (
+                    <div className="h-52">No transcript</div>
+                  )}
+                </div>
+              </Container>
+            </div>
           </div>
-          <div className="fixed bottom-0 left-0 w-full px-4 py-1 text-center bg-gray-1/30 backdrop-blur-lg">
-            <Container>
-              <div className="rounded-md bg-gray-12 p-2">
-                {currentImage.transcriptions.length != 0 ? (
-                  <>
-                    <p className="mt-2 px-12">
-                      {currentImage.transcriptions.map(
-                        (transcription, index) => {
-                          return (
-                            <span
-                              key={index}
-                              className={
-                                index === currentTranscriptionIndex
-                                  ? ""
-                                  : "text-gray-400"
-                              }
-                            >
-                              {transcription.text}
-                            </span>
-                          );
-                        },
-                      )}
-                    </p>
-                    <p className="mt-2">
-                      {
-                        currentImage.transcriptions[currentTranscriptionIndex]
-                          .pinyin
-                      }
-                    </p>
-                    <p className="mt-2">
-                      {
-                        currentImage.transcriptions[currentTranscriptionIndex]
-                          .translation
-                      }
-                    </p>
-                    <AudioPlayer
-                      currentImage={currentImage}
-                      index={currentTranscriptionIndex}
-                      handleTranscriptionNext={handleTranscriptionNext}
-                      handleTranscriptionPrev={handleTranscriptionPrev}
-                    />
-                  </>
-                ) : (
-                  <div className="h-52">No transcript</div>
-                )}
-              </div>
-            </Container>
-          </div>
-        </div>
+        )
       ) : (
         <div className="p-24 flex h-full items-center">
           <h1 className="text-3xl text-gray-900">
