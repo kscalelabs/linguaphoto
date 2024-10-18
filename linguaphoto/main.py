@@ -3,6 +3,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import socketio
 
 from linguaphoto.api.api import router
 from linguaphoto.socket import sio  # Import the `sio` and `notify_user` from socket.py
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(router, prefix="")
 
+app.mount("/", socketio.ASGIApp(sio, other_asgi_app=app))
 if __name__ == "__main__":
     print("Starting webserver...")
     uvicorn.run(app, port=8080, host="0.0.0.0")
