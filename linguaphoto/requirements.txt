@@ -40,4 +40,5 @@ openai
 
 requests
 stripe
-python-socketio[asgi]
+python-socketio
+
