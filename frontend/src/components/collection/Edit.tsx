@@ -6,14 +6,16 @@ import Modal from "components/modal";
 import UploadContent from "components/UploadContent";
 import { useAuth } from "contexts/AuthContext";
 import { useLoading } from "contexts/LoadingContext";
+import { useSocket } from "contexts/SocketContext";
 import { useAlertQueue } from "hooks/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { ListManager } from "react-beautiful-dnd-grid";
-import { Collection, Image } from "types/model";
+import { Collection, ImageType } from "types/model";
 type CollectionEditProps = {
   collection: Collection;
   setCollection: React.Dispatch<React.SetStateAction<Collection | undefined>>;
 };
+const skeletons = Array(5).fill(null);
 const CollectionEdit: React.FC<CollectionEditProps> = ({
   collection,
   setCollection,
@@ -22,10 +24,12 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const { auth, client } = useAuth();
+  const { updated_image } = useSocket();
   const { startLoading, stopLoading } = useLoading();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
-  const [images, setImages] = useState<Array<Image> | undefined>([]);
+  const [images, setImages] = useState<Array<ImageType> | undefined>([]);
+  const [is_loading, setIsLoading] = useState<boolean>(true);
   const [reorderImageIds, setReorderImageIds] = useState<Array<string> | null>(
     [],
   );
@@ -43,23 +47,18 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
         });
         if (error) addAlert(error.detail?.toString(), "error");
         else setImages(images);
+        setIsLoading(false);
       };
       asyncfunction();
     }
   }, [collection.id]);
-  useEffect(() => {}, [collection.images]);
-  const apiClient: AxiosInstance = useMemo(
-    () =>
-      axios.create({
-        baseURL: process.env.REACT_APP_BACKEND_URL, // Base URL for all requests
-        timeout: 10000, // Request timeout (in milliseconds)
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.token}`, // Add any default headers you need
-        },
-      }),
-    [auth?.token],
-  );
+  useEffect(() => {
+    if (updated_image && images) {
+      const img = images?.find((image) => image.id == updated_image.id);
+      if (img) img.is_translated = true;
+      setImages([...images]);
+    }
+  }, [updated_image]);
   const apiClient1: AxiosInstance = useMemo(
     () =>
       axios.create({
@@ -72,7 +71,6 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
       }),
     [auth?.token],
   );
-  const API = useMemo(() => new Api(apiClient), [apiClient]);
   const API_Uploader = useMemo(() => new Api(apiClient1), [apiClient1]);
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,10 +136,15 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
       const new_image = await API_Uploader.uploadImage(file, collection?.id);
       stopLoading();
       if (new_image) {
+        const first_image = new_image.image_url;
         if (collection.images.length == 0 || images == undefined) {
           // no images
           setImages([new_image]);
-          setFeaturedImage(new_image.image_url);
+          client.POST("/set_featured_image", {
+            body: { image_url: first_image, collection_id: collection.id },
+          });
+          // set the first image as featured one
+          setFeaturedImage(first_image);
         } else {
           // images exist
           images.push(new_image);
@@ -160,11 +163,7 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
         "The image is being tranlated. Please wait a moment.",
         "primary",
       );
-      const image_response = await API.translateImages([image_id]);
-      const i = images?.findIndex((image) => image.id == image_id);
-      images[i] = image_response[0];
-      setImages([...images]);
-      addAlert("The image has been tranlated!", "success");
+      await client.POST("/translate", { body: { image_id } });
       stopLoading();
     }
   };
@@ -200,9 +199,12 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
     setReorderImageIds([...reorderImageIds]);
     //featured image
     const image = images?.find((img) => img.id == reorderImageIds[0]);
-    if (image) setFeaturedImage(image?.image_url);
+    if (image) {
+      setFeaturedImage(image?.image_url);
+    }
     // Optionally, you can save the new order to your backend here
   };
+
   return (
     <div className="flex flex-col rounded-md min-h-full bg-gray-3 p-24 gap-8">
       <h1 className="text-3xl text-gray-900">Edit Collection </h1>
@@ -275,33 +277,34 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
             Order Save
           </button>
         </div> */}
-      {/* reordering part */}
+      {/* skeleton part */}
       <div className="flex flex-wrap justify-start w-full">
+        {is_loading &&
+          skeletons.map((__, index) => (
+            <div
+              className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/5"
+              key={index}
+            >
+              <div className="bg-gray-5 w-60 h-64 rounded-lg animate-pulse p-8">
+                <div className="bg-gray-8 w-full h-4 rounded-lg animate-pulse" />
+                <div className="bg-gray-8 w-full h-4 rounded-lg animate-pulse mt-12" />
+              </div>
+            </div>
+          ))}
+        {/* reordering part */}
         {reorderImageIds && images && (
           <ListManager
             items={reorderImageIds}
             direction="horizontal"
-            maxItems={3}
+            maxItems={1}
             onDragEnd={handleDragEnd}
             render={(id) => {
               const image = images.find((item) => item.id === id);
               return (
-                <div className="w-full md:w-1/2 lg:w-1/3">
-                  {image ? (
+                <div className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/5">
+                  {image && (
                     <ImageComponent
                       {...image}
-                      handleTranslateOneImage={handleTranslateOneImage}
-                      showDeleteModal={onShowDeleteImageModal}
-                    />
-                  ) : (
-                    <ImageComponent
-                      {...{
-                        id,
-                        is_translated: false,
-                        image_url: "",
-                        transcriptions: [],
-                        collection: collection.id,
-                      }}
                       handleTranslateOneImage={handleTranslateOneImage}
                       showDeleteModal={onShowDeleteImageModal}
                     />

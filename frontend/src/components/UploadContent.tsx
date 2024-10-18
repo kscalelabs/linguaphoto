@@ -1,7 +1,9 @@
+// src/components/UploadContent.tsx
 import { useAlertQueue } from "hooks/alerts";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { XCircleFill } from "react-bootstrap-icons";
 import ImageUploading, { ImageListType } from "react-images-uploading";
+
 interface UploadContentProps {
   onUpload: (file: File) => Promise<void>; // Updated to handle a single file
 }
@@ -21,12 +23,11 @@ const UploadContent: FC<UploadContentProps> = ({ onUpload }) => {
       const file = images[i].file as File;
       try {
         await onUpload(file); // Upload each file one by one
-        if (i == images.length - 1)
-          addAlert(`${i + 1} images has been uploaded!`, "success");
+        if (i === images.length - 1)
+          addAlert(`${i + 1} images have been uploaded!`, "success");
       } catch (error) {
-        addAlert(`${file.name} has been failed to upload. ${error}`, "error");
+        addAlert(`${file.name} failed to upload. ${error}`, "error");
         break;
-        // Optionally, handle failure feedback here
       }
     }
     setImages([]); // Clear images after uploading
@@ -36,6 +37,35 @@ const UploadContent: FC<UploadContentProps> = ({ onUpload }) => {
   const onChange = (imageList: ImageListType) => {
     setImages(imageList);
   };
+
+  // Handle image pasting from the clipboard
+  const handlePaste = (event: ClipboardEvent) => {
+    const clipboardItems = event.clipboardData?.items;
+    if (!clipboardItems) return;
+
+    for (let i = 0; i < clipboardItems.length; i++) {
+      const item = clipboardItems[i];
+      if (item.type.startsWith("image")) {
+        const file = item.getAsFile();
+        if (file) {
+          setImages((prevImages) => [
+            ...prevImages,
+            { file, data_url: URL.createObjectURL(file) },
+          ]);
+          addAlert("Image pasted from clipboard!", "success");
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    const pasteListener = (event: Event) =>
+      handlePaste(event as ClipboardEvent);
+    window.addEventListener("paste", pasteListener);
+    return () => {
+      window.removeEventListener("paste", pasteListener);
+    };
+  }, []);
 
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg">
@@ -66,7 +96,8 @@ const UploadContent: FC<UploadContentProps> = ({ onUpload }) => {
               {...dragProps} // Drag-n-Drop props
             >
               <p className="text-gray-500 dark:text-gray-400">
-                Drag & drop images here, or click to select files
+                Drag & drop images here, click to select files, or paste an
+                image from your clipboard
               </p>
             </div>
 

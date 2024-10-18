@@ -5,12 +5,12 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from linguaphoto.crud.collection import CollectionCrud
-from linguaphoto.errors import NotAuthorizedError
 from linguaphoto.models import Collection
 from linguaphoto.schemas.collection import (
     CollectionCreateFragment,
     CollectionEditFragment,
     CollectionPublishFragment,
+    FeaturedImageFragnment,
 )
 from linguaphoto.utils.auth import get_current_user_id
 
@@ -42,8 +42,8 @@ async def getcollection(
         collection = await collection_crud.get_collection(id)
         if collection is None:
             raise ValueError
-        if collection.user != user_id:
-            raise NotAuthorizedError
+        # if collection.user != user_id:
+        #     raise NotAuthorizedError
         return collection
 
 
@@ -83,6 +83,17 @@ async def deletecollection(
 ) -> None:
     async with collection_crud:
         await collection_crud.delete_collection(collection_id=id)
+        return
+
+
+@router.post("/set_featured_image", response_model=None)
+async def setfeaturedimage(
+    data: FeaturedImageFragnment,
+    user_id: str = Depends(get_current_user_id),
+    collection_crud: CollectionCrud = Depends(),
+) -> None:
+    async with collection_crud:
+        await collection_crud.edit_collection(data.collection_id, updates={"featured_image": data.image_url})
         return
 
 

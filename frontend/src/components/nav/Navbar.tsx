@@ -12,7 +12,6 @@ const Navbar = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: "Home", path: "/", isExternal: false },
     { name: "My Collections", path: "/collections", isExternal: false },
     { name: "Subscription", path: "/subscription", isExternal: false },
   ];

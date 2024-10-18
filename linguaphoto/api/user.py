@@ -29,14 +29,7 @@ async def signup(user: UserSignupFragment, user_crud: UserCrud = Depends()) -> d
     async with user_crud:
         new_user = await user_crud.create_user_from_email(user)
         if new_user is None:
-            print(
-                UserSigninRespondFragment(
-                    token="", username=user.username, email=user.email, is_subscription=False, is_auth=False
-                ).model_dump()
-            )
-            return UserSigninRespondFragment(
-                token="", username=user.username, email=user.email, is_subscription=False, is_auth=False
-            ).model_dump()
+            return None
         token = create_access_token({"id": new_user.id}, timedelta(hours=24))
         res_user = new_user.model_dump()
         res_user.update({"token": token, "is_auth": True})

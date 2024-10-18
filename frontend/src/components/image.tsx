@@ -1,13 +1,8 @@
 import React from "react";
-import {
-  CheckCircleFill,
-  LockFill,
-  PencilFill,
-  TrashFill,
-} from "react-bootstrap-icons";
-import { Image } from "types/model";
-// Extend the existing Image interface to include the new function
-interface ImageWithFunction extends Image {
+import { CheckCircleFill, LockFill, TrashFill } from "react-bootstrap-icons";
+import { ImageType } from "types/model";
+// Extend the existing ImageType interface to include the new function
+interface ImageWithFunction extends ImageType {
   handleTranslateOneImage: (image_id: string) => void;
   showDeleteModal: (id: string) => void;
 }
@@ -20,10 +15,10 @@ const ImageComponent: React.FC<ImageWithFunction> = ({
 }) => {
   return (
     <div
-      className="relative w-full h-80 min-w-80 bg-cover bg-center border-1 border-gray-800 dark:border-gray-50"
+      className="relative w-full h-64 min-w-64 bg-cover bg-center border border-3 border-gray-200 shadow-md bg-white"
       style={{ backgroundImage: `url(${image_url})` }}
     >
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/30">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/20">
         {is_translated ? (
           <>
             <div className="absolute top-2 right-2 flex items-center text-white bg-green-600 py-1 px-3 rounded text-xs">
@@ -43,10 +38,10 @@ const ImageComponent: React.FC<ImageWithFunction> = ({
         <div className="absolute inset-x-0 bottom-1/2 transform translate-y-1/2 flex items-center justify-center gap-2">
           {is_translated ? (
             <div className="flex gap-2">
-              <button className="bg-yellow-500 text-white py-1 px-3 rounded flex items-center">
+              {/* <button className="bg-yellow-500 text-white py-1 px-3 rounded flex items-center">
                 <PencilFill className="mr-2" />
                 Edit
-              </button>
+              </button> */}
               <button
                 className="bg-red-500 text-white py-1 px-2 rounded flex items-center"
                 onClick={() => {

@@ -2,7 +2,7 @@
 import axios from "axios";
 import { Response, SigninData, SignupData } from "types/auth";
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || "https://localhost:8080";
+const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 export const signup = async (data: SignupData): Promise<Response> => {
   const response = await axios.post(`${API_URL}/signup`, data);

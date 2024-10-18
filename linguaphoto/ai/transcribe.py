@@ -38,6 +38,8 @@ Return the sections in the canonical order they appear in the image. For
 example, when reading manga, read from right to left, top to bottom. When
 reading a book, if the text is in columns, read from right to left, top to
 bottom. If the text is in rows, read from left to right, top to bottom.
+note: the response must be only JSON content without any comment, symbol, or anything.
+In case you don't find any Chinese characters, return {"transcriptions": []}
 """.strip()
 
 
@@ -89,7 +91,6 @@ async def transcribe_image(image_source: BytesIO, client: AsyncOpenAI) -> Transc
 
     raw_response = data["choices"][0]["message"]["content"]
     transcription_response = TranscriptionResponse.model_validate_json(raw_response)
-
     return transcription_response
 
 
