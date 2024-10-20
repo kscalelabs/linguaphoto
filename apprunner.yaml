@@ -12,7 +12,7 @@ build:
 
 # Specify the start phase command
 run:
-  command: venv/bin/python3 linguaphoto.main  # Adjust to the path to your application entry point
+  command: venv/bin/python3 -m linguaphoto.main  # Adjust to the path to your application entry point
   env:
     - name: HOMEPAGE_URL
       value: "linguaphoto.com"
