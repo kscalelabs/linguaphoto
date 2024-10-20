@@ -9,7 +9,7 @@ from linguaphoto.crud.collection import CollectionCrud
 from linguaphoto.crud.image import ImageCrud
 from linguaphoto.models import Image
 from linguaphoto.schemas.image import ImageTranslateFragment
-from linguaphoto.socket import notify_user
+from linguaphoto.socket_manager import notify_user
 from linguaphoto.utils.auth import get_current_user_id, subscription_validate
 
 router = APIRouter()
