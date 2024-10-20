@@ -14,7 +14,7 @@ import LoginPage from "pages/Login";
 import NotFound from "pages/NotFound";
 import SubscriptionTypePage from "pages/SubscriptioinType";
 import SubscriptionCancelPage from "pages/Subscription";
-import PrivateRoute from "ProtectedRoute";
+import PrivateRoute from "PrivateRoute";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 

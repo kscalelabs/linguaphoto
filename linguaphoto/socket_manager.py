@@ -7,9 +7,7 @@ from linguaphoto.settings import settings
 # Create a new Socket.IO server with CORS enabled
 sio = socketio.AsyncServer(
     async_mode="asgi",
-    cors_allowed_origins=[
-        settings.homepage_url
-    ],  # Update this to match your frontend URL
+    cors_allowed_origins=["http://localhost:3000"]
 )
 # Dictionary to store connected users by their socket ID
 connected_users: dict[str, str] = {}
