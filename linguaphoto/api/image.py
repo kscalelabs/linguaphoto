@@ -9,6 +9,7 @@ from linguaphoto.crud.collection import CollectionCrud
 from linguaphoto.crud.image import ImageCrud
 from linguaphoto.models import Image
 from linguaphoto.schemas.image import ImageTranslateFragment
+from linguaphoto.socket_manager import notify_user
 from linguaphoto.utils.auth import get_current_user_id, subscription_validate
 
 router = APIRouter()
@@ -20,6 +21,8 @@ async def translate_background(image_id: str, image_crud: ImageCrud, user_id: st
         translating_images.append(image_id)
         image = await image_crud.translate(image_id, user_id)
         translating_images.remove(image_id)
+        if image:
+            await notify_user(user_id, image.model_dump())  # Use await here
 
 
 @router.post("/upload", response_model=Image)
