@@ -23,8 +23,8 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="")
+app = socketio.ASGIApp(sio, app)
 
-app.mount("/", socketio.ASGIApp(sio, other_asgi_app=app))
 if __name__ == "__main__":
     print("Starting webserver...")
     uvicorn.run(app, port=8080, host="0.0.0.0")

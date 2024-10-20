@@ -11,7 +11,6 @@ sio = socketio.AsyncServer(
         settings.homepage_url
     ],  # Update this to match your frontend URL
 )
-
 # Dictionary to store connected users by their socket ID
 connected_users: dict[str, str] = {}
 
