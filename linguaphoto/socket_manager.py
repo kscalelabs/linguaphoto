@@ -17,7 +17,7 @@ connected_users: dict[str, str] = {}
 
 # Handle client connection
 @sio.event
-async def connect(sid: str) -> None:
+async def connect(sid: str, environ: dict) -> None:
     print(f"User connected: {sid}")
 
 
