@@ -15,7 +15,7 @@ run:
   command: venv/bin/python3 -m linguaphoto.main  # Adjust to the path to your application entry point
   env:
     - name: HOMEPAGE_URL
-      value: "linguaphoto.com"
+      value: "https://linguaphoto.com"
     - name: DYNAMODB_TABLE_NAME
       value: "linguaphoto"
     - name: S3_BUCKET_NAME
