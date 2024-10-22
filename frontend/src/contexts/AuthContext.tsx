@@ -75,7 +75,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (apiKeyId) {
       const fetch_data = async () => {
-        const { data, error } = await client.GET("/me");
+        const { data, error } = await client.GET("/user/me");
         if (error) {
           signout();
         } else {

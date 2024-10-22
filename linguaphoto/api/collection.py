@@ -17,7 +17,7 @@ from linguaphoto.utils.auth import get_current_user_id
 router = APIRouter()
 
 
-@router.post("/create_collection", response_model=Collection)
+@router.post("/create", response_model=Collection)
 async def create(
     collection: CollectionCreateFragment,
     user_id: str = Depends(get_current_user_id),
@@ -34,7 +34,7 @@ async def create(
         return new_collection
 
 
-@router.get("/get_collection", response_model=Collection)
+@router.get("/get", response_model=Collection)
 async def getcollection(id: str, collection_crud: CollectionCrud = Depends()) -> Collection:
     async with collection_crud:
         collection = await collection_crud.get_collection(id)
@@ -45,7 +45,7 @@ async def getcollection(id: str, collection_crud: CollectionCrud = Depends()) ->
         return collection
 
 
-@router.get("/get_collections", response_model=List[Collection])
+@router.get("/get_all", response_model=List[Collection])
 async def getcollections(
     user_id: str = Depends(get_current_user_id), collection_crud: CollectionCrud = Depends()
 ) -> List[Collection]:
@@ -54,7 +54,7 @@ async def getcollections(
         return collections
 
 
-@router.post("/edit_collection")
+@router.post("/edit")
 async def editcollection(
     collection: CollectionEditFragment,
     user_id: str = Depends(get_current_user_id),
@@ -73,7 +73,7 @@ async def editcollection(
         return
 
 
-@router.get("/delete_collection")
+@router.get("/delete")
 async def deletecollection(
     id: str,
     user_id: str = Depends(get_current_user_id),
@@ -95,7 +95,7 @@ async def setfeaturedimage(
         return
 
 
-@router.post("/publish_collection")
+@router.post("/set_publish")
 async def publishcollection(
     data: CollectionPublishFragment,
     user_id: str = Depends(get_current_user_id),
@@ -106,7 +106,7 @@ async def publishcollection(
         return
 
 
-@router.get("/public_collections")
+@router.get("/get_public_items")
 async def publiccoleections(
     collection_crud: CollectionCrud = Depends(),
 ) -> List[Collection]:

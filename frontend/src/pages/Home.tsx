@@ -18,7 +18,7 @@ const Home = () => {
     useState<boolean>(true);
   useEffect(() => {
     (async () => {
-      const { data } = await client.GET("/public_collections");
+      const { data } = await client.GET("/collection/get_public_items");
       setPublicCollections(data);
       setIsPublicCollectionRoading(false);
     })();
@@ -26,7 +26,7 @@ const Home = () => {
   useEffect(() => {
     if (auth?.is_auth)
       (async () => {
-        const { data } = await client.GET("/get_collections");
+        const { data } = await client.GET("/collection/get_all");
         setCollections(data);
         setIsCollectionRoading(false);
       })();

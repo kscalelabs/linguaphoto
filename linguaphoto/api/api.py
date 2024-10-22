@@ -20,10 +20,10 @@ from linguaphoto.api import collection, image, subscription, user
 router = APIRouter()
 
 # Include the user-related routes
-router.include_router(user.router)
-router.include_router(collection.router)
-router.include_router(image.router)
-router.include_router(subscription.router)
+router.include_router(user.router, prefix="/user")
+router.include_router(collection.router, prefix="/collection")
+router.include_router(image.router, prefix="/image")
+router.include_router(subscription.router, prefix="/subscription")
 
 
 # Define a root endpoint that returns a simple message
