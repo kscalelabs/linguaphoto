@@ -58,15 +58,7 @@ const App = () => {
                           />
                         }
                       />
-                      <Route
-                        path="/collection/:id"
-                        element={
-                          <PrivateRoute
-                            element={<CollectionPage />}
-                            requiredSubscription={true} // Set true if subscription is required for this route
-                          />
-                        }
-                      />
+                      <Route path="/collection/:id" element={<CollectionPage />}/>
                       <Route
                         path="/subscription"
                         element={

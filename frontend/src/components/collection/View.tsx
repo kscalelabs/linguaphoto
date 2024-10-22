@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Collection, ImageType } from "types/model";
 
 type CollectionViewProps = {
-  collection: Collection;
+  collection: Collection | undefined;
 };
 
 const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
@@ -20,7 +20,7 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
 
   // Get translated images
   const translatedImages = useMemo(() => {
-    if (images) {
+    if (images && collection) {
       const filter = images.filter((img) => img.is_translated);
       const final_filter = collection.images
         ?.map((img) => {
@@ -31,7 +31,7 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
       if (final_filter) return final_filter;
     }
     return [];
-  }, [images]);
+  }, [images, collection]);
 
   // Preload images one by one
   const preloadImage = (src: string) => {
@@ -131,14 +131,29 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
     };
   }, [handleKey]);
 
+  const FantasyLoading = () => {
+    return (
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Loader Wrapper */}
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-12 transition-opacity duration-1000 opacity-100">
+          <div className="relative w-36 h-36">
+            {/* Outer Spinner */}
+            <div className="absolute inset-0 border-4 border-transparent border-t-teal-500 rounded-full animate-spin"></div>
+            {/* Middle Spinner */}
+            <div className="absolute inset-1 border-4 border-transparent border-t-red-500 rounded-full animate-spin-reverse"></div>
+            {/* Inner Spinner */}
+            <div className="absolute inset-4 border-4 border-transparent border-t-yellow-500 rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col rounded-md h-full items-center bg-gray-0 gap-4 w-full">
       {isLoading ? (
-        <div className="flex flex-col h-full w-full gap-4">
-          <div className="bg-gray-3 w-full rounded-lg h-3/4 animate-pulse" />
-          <div className="bg-gray-3 w-full rounded-lg h-1/4 animate-pulse" />
-        </div>
-      ) : translatedImages ? (
+        <FantasyLoading />
+      ) : translatedImages.length > 0 ? (
         currentImage && (
           <div className="flex flex-col align-items-center w-full">
             <div className="w-full absolute left-0">
@@ -147,7 +162,7 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
                 src={currentImage.image_url}
                 alt="Collection Image"
                 className="w-full select-none"
-                style={{ marginBottom: "230px" }}
+                style={currentImage.transcriptions.length != 0 ? { marginBottom: "230px" } : {}}
                 onClick={handlePhotoClick}
               />
             </div>
@@ -194,7 +209,7 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
                       />
                     </>
                   ) : (
-                    <div className="h-52">No transcript</div>
+                    <div className="h-8 flex flex-col items-center justify-center text-md"><span>No transcript</span></div>
                   )}
                 </div>
               </Container>

@@ -25,20 +25,18 @@ const CollectionPage: React.FC = () => {
 
   // Simulate fetching data for the edit page (mocking API call)
   useEffect(() => {
-    if (id && auth?.is_auth) {
+    if (id) {
       const asyncfunction = async () => {
-        startLoading();
         const { data: collection, error } = await client.GET(
           "/get_collection",
           { params: { query: { id } } },
         );
         if (error) addAlert(error.detail?.toString(), "error");
         else setCollection(collection);
-        stopLoading();
       };
       asyncfunction();
     }
-  }, [id, auth]);
+  }, [id]);
 
   // Return button handler
   // const handleReturn = () => {
@@ -81,13 +79,13 @@ const CollectionPage: React.FC = () => {
     return <CollectionNew />;
   }
   // Rendering Edit Collection Page
-  if (id && isEditAction && collection) {
+  if (id && isEditAction) {
     return (
       <CollectionEdit collection={collection} setCollection={setCollection} />
     );
   }
   // Rendering Collection Detail Page
-  if (id && !isEditAction && collection) {
+  if (id && !isEditAction) {
     return <CollectionView collection={collection} />;
   }
   //skeleton

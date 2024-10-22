@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ListManager } from "react-beautiful-dnd-grid";
 import { Collection, ImageType } from "types/model";
 type CollectionEditProps = {
-  collection: Collection;
+  collection: Collection | undefined;
   setCollection: React.Dispatch<React.SetStateAction<Collection | undefined>>;
 };
 const skeletons = Array(5).fill(null);
@@ -51,7 +51,7 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
       };
       asyncfunction();
     }
-  }, [collection.id]);
+  }, [collection?.id]);
   useEffect(() => {
     if (updated_image && images) {
       const img = images?.find((image) => image.id == updated_image.id);
@@ -168,14 +168,14 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
     }
   };
   const onDeleteImage = async () => {
-    if (deleteImageId) {
+    if (deleteImageId && collection) {
       startLoading();
       const { error } = await client.GET("/delete_image", {
         params: { query: { id: deleteImageId } },
       });
       if (error) addAlert(error.detail?.toString(), "error");
       else if (images) {
-        const new_images_ID = collection.images.filter(
+        const new_images_ID = collection?.images.filter(
           (image) => image !== deleteImageId,
         );
         collection.images = new_images_ID;
@@ -229,42 +229,46 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
               required
             />
           </div>
-          <Book
-            title={title}
-            description={description}
-            id={collection.id}
-            featured_image={featured_image}
-          />
+          {collection &&
+            <Book
+              title={title}
+              description={description}
+              id={collection.id}
+              featured_image={featured_image}
+            />}
         </div>
-        <div className="flex justify-content-end w-full gap-2">
-          <button
-            className="bg-blue-500 text-white w-35 p-2 rounded hover:bg-blue-600"
-            onClick={() => setShowUploadModal(true)}
-          >
-            Add Images
-          </button>
-          <button
-            className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
-            disabled={
-              collection.images.join() == reorderImageIds?.join() &&
-              collection.title == title &&
-              collection.description == description
-            }
-            type="submit"
-            name="action"
-            value="save"
-          >
-            Save Changes
-          </button>
-          <button
-            className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
-            type="submit"
-            name="action"
-            value="publish"
-          >
-            {collection.publish_flag ? "Unpublish" : "Publish"}
-          </button>
-        </div>
+        {
+          collection &&
+          <div className="flex justify-content-end w-full gap-2">
+            <button
+              className="bg-blue-500 text-white w-35 p-2 rounded hover:bg-blue-600"
+              onClick={() => setShowUploadModal(true)}
+            >
+              Add Images
+            </button>
+            <button
+              className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
+              disabled={
+                collection.images.join() == reorderImageIds?.join() &&
+                collection.title == title &&
+                collection.description == description
+              }
+              type="submit"
+              name="action"
+              value="save"
+            >
+              Save Changes
+            </button>
+            <button
+              className="bg-blue-500 text-white w-30 p-2 rounded hover:bg-blue-600"
+              type="submit"
+              name="action"
+              value="publish"
+            >
+              {collection.publish_flag ? "Unpublish" : "Publish"}
+            </button>
+          </div>
+        }
       </form>
       {/* <div className="flex gap-4">
           <button

@@ -69,8 +69,8 @@ class ImageCrud(BaseCrud):
         # Return the signed S3 URL
         return s3_url
 
-    async def get_images(self, collection_id: str, user_id: str) -> List[Image]:
-        images = await self._get_items_from_secondary_index("user", user_id, Image, Key("collection").eq(collection_id))
+    async def get_images(self, collection_id: str) -> List[Image]:
+        # images = await self._get_items_from_secondary_index("user", user_id, Image, Key("collection").eq(collection_id))
         images = await self._list_items(
             item_class=Image,
             filter_expression="#collection=:collection",

@@ -36,7 +36,7 @@ async def create(
 
 @router.get("/get_collection", response_model=Collection)
 async def getcollection(
-    id: str, user_id: str = Depends(get_current_user_id), collection_crud: CollectionCrud = Depends()
+    id: str, collection_crud: CollectionCrud = Depends()
 ) -> Collection:
     async with collection_crud:
         collection = await collection_crud.get_collection(id)

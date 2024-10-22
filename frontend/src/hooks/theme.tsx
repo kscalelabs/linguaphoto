@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import throttle from "lodash/throttle";
 
 type Theme = "light" | "dark";
 
@@ -61,25 +62,60 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
     setThemeWithLocalStorage(theme);
   };
 
-  const scrollSpeed = 10; // Increase this value to make scrolling faster
+  const scrollSpeed = 200; // Increase this value to make scrolling faster
 
-  useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault(); // Prevent default scroll behavior
+  // useEffect(() => {
+  //   const handleWheel = (event: WheelEvent) => {
+  //     event.preventDefault(); // Prevent default scroll behavior
+  //     window.scrollBy({
+  //       top: event.deltaY * scrollSpeed, // Multiply the scroll amount
+  //       left: 0,
+  //       behavior: "smooth", // Use smooth scrolling
+  //     });
+  //   };
+
+  //   window.addEventListener("wheel", handleWheel, { passive: false });
+
+  //   // Clean up the event listener on component unmount
+  //   return () => {
+  //     window.removeEventListener("wheel", handleWheel);
+  //   };
+  // }, []); // Empty dependency array ensures this runs only on mount and unmount
+
+const handleKey = throttle((event: KeyboardEvent) => {
+  switch (event.key) {
+    case "ArrowUp":
       window.scrollBy({
-        top: event.deltaY * scrollSpeed, // Multiply the scroll amount
+        top: -600,
         left: 0,
-        behavior: "smooth", // Use smooth scrolling
+        behavior: "smooth",
       });
-    };
+      break;
+    case "ArrowDown":
+      window.scrollBy({
+        top: 600,
+        left: 0,
+        behavior: "smooth",
+      });
+      break;
+  }
+}, 300);
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
+useEffect(() => {
+  const throttledHandleKey = (event: KeyboardEvent) => {
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault(); // Prevent the default behavior for arrow keys.
+      handleKey(event);
+    }
+  }; // Adjust the throttle delay (200ms here) as needed.
 
-    // Clean up the event listener on component unmount
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-    };
-  }, []); // Empty dependency array ensures this runs only on mount and unmount
+  window.addEventListener("keydown", throttledHandleKey);
+  return () => {
+    window.removeEventListener("keydown", throttledHandleKey);
+    handleKey.cancel(); // Clean up the throttling
+  };
+}, []);
+
 
   useEffect(() => {
     document.body.setAttribute("data-bs-theme", theme);
