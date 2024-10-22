@@ -23,7 +23,7 @@ const Collections = () => {
   const onDelete = async () => {
     if (delete_ID) {
       startLoading();
-      const { error } = await client.GET("/delete_collection", {
+      const { error } = await client.GET("/collection/delete", {
         params: { query: { id: delete_ID } },
       });
       if (error) addAlert(error.detail?.toString(), "error");
@@ -42,8 +42,9 @@ const Collections = () => {
   useEffect(() => {
     if (auth?.is_auth) {
       const asyncfunction = async () => {
-        const { data: collections, error } =
-          await client.GET("/get_collections");
+        const { data: collections, error } = await client.GET(
+          "/collection/get_all",
+        );
         if (error) addAlert(error.detail?.toString(), "error");
         else setCollection(collections);
         setIsLoading(false);

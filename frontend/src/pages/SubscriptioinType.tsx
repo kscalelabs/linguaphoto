@@ -47,7 +47,7 @@ const CheckoutForm = () => {
       }
       startLoading();
       // Send payment method to the backend for subscription creation
-      const { data, error: err } = await client.POST("/create_subscription", {
+      const { data, error: err } = await client.POST("/subscription/create", {
         body: { payment_method_id: paymentMethod.id, email, name },
       });
       stopLoading();

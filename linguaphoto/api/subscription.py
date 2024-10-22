@@ -15,7 +15,7 @@ stripe.api_key = settings.stripe_key
 price_id = settings.stripe_price_id
 
 
-@router.post("/create_subscription")
+@router.post("/create")
 async def subscribe(data: dict, user_id: str = Depends(get_current_user_id), user_crud: UserCrud = Depends()) -> dict:
     print(settings.openai_key)
     try:

@@ -26,7 +26,7 @@ const CollectionPage: React.FC = () => {
     if (id) {
       const asyncfunction = async () => {
         const { data: collection, error } = await client.GET(
-          "/get_collection",
+          "/collection/get",
           { params: { query: { id } } },
         );
         if (error) addAlert(error.detail?.toString(), "error");

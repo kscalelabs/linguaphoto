@@ -4,7 +4,7 @@
  */
 import { Collection, ImageType } from "types/model";
 export interface paths {
-  "/translate": {
+  "/image/translate": {
     parameters: {
       query?: never;
       header?: never;
@@ -38,7 +38,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/get_images": {
+  "/image/get_all": {
     parameters: {
       query?: never;
       header?: never;
@@ -55,7 +55,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/delete_image": {
+  "/image/delete": {
     parameters: {
       query?: never;
       header?: never;
@@ -72,7 +72,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/create_collection": {
+  "/collection/create": {
     parameters: {
       query?: never;
       header?: never;
@@ -89,7 +89,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/edit_collection": {
+  "/collection/edit": {
     parameters: {
       query?: never;
       header?: never;
@@ -106,7 +106,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/get_collection": {
+  "/collection/get": {
     parameters: {
       query?: never;
       header?: never;
@@ -123,7 +123,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/get_collections": {
+  "/collection/get_all": {
     parameters: {
       query?: never;
       header?: never;
@@ -140,7 +140,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/delete_collection": {
+  "/collection/delete": {
     parameters: {
       query?: never;
       header?: never;
@@ -157,7 +157,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/publish_collection": {
+  "/collection/set_publish": {
     parameters: {
       query?: never;
       header?: never;
@@ -173,7 +173,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/public_collections": {
+  "/collection/get_public_items": {
     parameters: {
       query?: never;
       header?: never;
@@ -189,7 +189,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/create_subscription": {
+  "/subscription/create": {
     parameters: {
       query?: never;
       header?: never;
@@ -206,7 +206,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/me": {
+  "/user/me": {
     parameters: {
       query?: never;
       header?: never;
@@ -242,7 +242,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/signup": {
+  "/user/signup": {
     parameters: {
       query?: never;
       header?: never;
@@ -259,7 +259,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/signin": {
+  "/user/signin": {
     parameters: {
       query?: never;
       header?: never;

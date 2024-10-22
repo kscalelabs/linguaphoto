@@ -16,11 +16,11 @@ const CollectionNew: React.FC = () => {
     e.preventDefault();
     startLoading();
     const { data: collection, error } = await client.POST(
-      "/create_collection",
+      "/collection/create",
       { body: { title, description } },
     );
     if (error) addAlert(error.detail?.toString(), "error");
-    else if (collection != null) {
+    else if (collection) {
       navigate(`/collection/${collection.id}?Action=edit`);
       addAlert("New collection has been created successfully!", "success");
     } else addAlert("The process has gone wrong!", "error");

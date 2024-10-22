@@ -42,7 +42,7 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
       setFeaturedImage(collection.featured_image);
       setReorderImageIds([...collection.images]);
       const asyncfunction = async () => {
-        const { data: images, error } = await client.GET("/get_images", {
+        const { data: images, error } = await client.GET("/image/get_all", {
           params: { query: { collection_id: collection.id } },
         });
         if (error) addAlert(error.detail?.toString(), "error");
@@ -85,7 +85,7 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
           const asyncfunction = async () => {
             startLoading();
             collection.images = reorderImageIds;
-            const { error } = await client.POST("/edit_collection", {
+            const { error } = await client.POST("/collection/edit", {
               body: { ...collection, featured_image, title, description },
             });
             if (error) addAlert(error.detail?.toString(), "error");
@@ -108,7 +108,7 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
         break;
       case "publish":
         if (collection) {
-          const { error } = await client.POST("/publish_collection", {
+          const { error } = await client.POST("/collection/set_publish", {
             body: { id: collection.id, flag: !collection.publish_flag },
           });
           if (error) addAlert(error.detail?.toString(), "error");
@@ -163,14 +163,14 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
         "The image is being tranlated. Please wait a moment.",
         "primary",
       );
-      await client.POST("/translate", { body: { image_id } });
+      await client.POST("/image/translate", { body: { image_id } });
       stopLoading();
     }
   };
   const onDeleteImage = async () => {
     if (deleteImageId && collection) {
       startLoading();
-      const { error } = await client.GET("/delete_image", {
+      const { error } = await client.GET("/image/delete", {
         params: { query: { id: deleteImageId } },
       });
       if (error) addAlert(error.detail?.toString(), "error");

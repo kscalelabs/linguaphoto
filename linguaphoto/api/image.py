@@ -42,14 +42,14 @@ async def upload_image(
         return image
 
 
-@router.get("/get_images", response_model=List[Image])
+@router.get("/get_all", response_model=List[Image])
 async def get_images(collection_id: str, image_crud: ImageCrud = Depends()) -> List[Image]:
     async with image_crud:
         images = await image_crud.get_images(collection_id=collection_id)
         return images
 
 
-@router.get("/delete_image")
+@router.get("/delete")
 async def delete_image(
     id: str,
     user_id: str = Depends(get_current_user_id),
