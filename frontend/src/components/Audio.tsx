@@ -107,6 +107,21 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     }
   }, [currentImage, index]);
 
+  const handleKey = (event: KeyboardEvent) => {
+    if (event.key === " " || event.code === "Space") {
+      // Prevent default action, e.g., scrolling
+      event.preventDefault();
+      togglePlayPause();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [handleKey]);
+
   return (
     <div className="mt-2 w-full text-center bg-gray-12 px-4 py-1 rounded-md">
       <audio ref={audioRef}>

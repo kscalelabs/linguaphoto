@@ -43,11 +43,9 @@ async def upload_image(
 
 
 @router.get("/get_images", response_model=List[Image])
-async def get_images(
-    collection_id: str, user_id: str = Depends(get_current_user_id), image_crud: ImageCrud = Depends()
-) -> List[Image]:
+async def get_images(collection_id: str, image_crud: ImageCrud = Depends()) -> List[Image]:
     async with image_crud:
-        images = await image_crud.get_images(collection_id=collection_id, user_id=user_id)
+        images = await image_crud.get_images(collection_id=collection_id)
         return images
 
 
