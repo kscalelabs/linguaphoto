@@ -229,16 +229,16 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
               required
             />
           </div>
-          {collection &&
+          {collection && (
             <Book
               title={title}
               description={description}
               id={collection.id}
               featured_image={featured_image}
-            />}
+            />
+          )}
         </div>
-        {
-          collection &&
+        {collection && (
           <div className="flex justify-content-end w-full gap-2">
             <button
               className="bg-blue-500 text-white w-35 p-2 rounded hover:bg-blue-600"
@@ -268,7 +268,7 @@ const CollectionEdit: React.FC<CollectionEditProps> = ({
               {collection.publish_flag ? "Unpublish" : "Publish"}
             </button>
           </div>
-        }
+        )}
       </form>
       {/* <div className="flex gap-4">
           <button

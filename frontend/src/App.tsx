@@ -58,7 +58,10 @@ const App = () => {
                           />
                         }
                       />
-                      <Route path="/collection/:id" element={<CollectionPage />}/>
+                      <Route
+                        path="/collection/:id"
+                        element={<CollectionPage />}
+                      />
                       <Route
                         path="/subscription"
                         element={

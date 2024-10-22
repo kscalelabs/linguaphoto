@@ -2,7 +2,6 @@ import CollectionEdit from "components/collection/Edit";
 import CollectionNew from "components/collection/New";
 import CollectionView from "components/collection/View";
 import { useAuth } from "contexts/AuthContext";
-import { useLoading } from "contexts/LoadingContext";
 import { useAlertQueue } from "hooks/alerts";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -14,9 +13,8 @@ const CollectionPage: React.FC = () => {
   const [collection, setCollection] = useState<Collection | undefined>(
     undefined,
   );
-  const { auth, client } = useAuth();
+  const { client } = useAuth();
   const { addAlert } = useAlertQueue();
-  const { startLoading, stopLoading } = useLoading();
   // Helper to check if it's an edit action
   const isEditAction = useMemo(
     () => location.search.includes("Action=edit"),

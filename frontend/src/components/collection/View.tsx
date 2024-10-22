@@ -162,7 +162,11 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
                 src={currentImage.image_url}
                 alt="Collection Image"
                 className="w-full select-none"
-                style={currentImage.transcriptions.length != 0 ? { marginBottom: "230px" } : {}}
+                style={
+                  currentImage.transcriptions.length != 0
+                    ? { marginBottom: "230px" }
+                    : {}
+                }
                 onClick={handlePhotoClick}
               />
             </div>
@@ -209,7 +213,9 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
                       />
                     </>
                   ) : (
-                    <div className="h-8 flex flex-col items-center justify-center text-md"><span>No transcript</span></div>
+                    <div className="h-8 flex flex-col items-center justify-center text-md">
+                      <span>No transcript</span>
+                    </div>
                   )}
                 </div>
               </Container>

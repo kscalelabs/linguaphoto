@@ -1,3 +1,4 @@
+import throttle from "lodash/throttle";
 import {
   createContext,
   ReactNode,
@@ -5,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import throttle from "lodash/throttle";
 
 type Theme = "light" | "dark";
 
@@ -62,7 +62,7 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
     setThemeWithLocalStorage(theme);
   };
 
-  const scrollSpeed = 200; // Increase this value to make scrolling faster
+  // const scrollSpeed = 200; // Increase this value to make scrolling faster
 
   // useEffect(() => {
   //   const handleWheel = (event: WheelEvent) => {
@@ -82,40 +82,39 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   //   };
   // }, []); // Empty dependency array ensures this runs only on mount and unmount
 
-const handleKey = throttle((event: KeyboardEvent) => {
-  switch (event.key) {
-    case "ArrowUp":
-      window.scrollBy({
-        top: -600,
-        left: 0,
-        behavior: "smooth",
-      });
-      break;
-    case "ArrowDown":
-      window.scrollBy({
-        top: 600,
-        left: 0,
-        behavior: "smooth",
-      });
-      break;
-  }
-}, 300);
-
-useEffect(() => {
-  const throttledHandleKey = (event: KeyboardEvent) => {
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      event.preventDefault(); // Prevent the default behavior for arrow keys.
-      handleKey(event);
+  const handleKey = throttle((event: KeyboardEvent) => {
+    switch (event.key) {
+      case "ArrowUp":
+        window.scrollBy({
+          top: -600,
+          left: 0,
+          behavior: "smooth",
+        });
+        break;
+      case "ArrowDown":
+        window.scrollBy({
+          top: 600,
+          left: 0,
+          behavior: "smooth",
+        });
+        break;
     }
-  }; // Adjust the throttle delay (200ms here) as needed.
+  }, 300);
 
-  window.addEventListener("keydown", throttledHandleKey);
-  return () => {
-    window.removeEventListener("keydown", throttledHandleKey);
-    handleKey.cancel(); // Clean up the throttling
-  };
-}, []);
+  useEffect(() => {
+    const throttledHandleKey = (event: KeyboardEvent) => {
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault(); // Prevent the default behavior for arrow keys.
+        handleKey(event);
+      }
+    }; // Adjust the throttle delay (200ms here) as needed.
 
+    window.addEventListener("keydown", throttledHandleKey);
+    return () => {
+      window.removeEventListener("keydown", throttledHandleKey);
+      handleKey.cancel(); // Clean up the throttling
+    };
+  }, []);
 
   useEffect(() => {
     document.body.setAttribute("data-bs-theme", theme);

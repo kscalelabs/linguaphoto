@@ -94,8 +94,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
       // Clean up the event listeners on component unmount
       return () => {
-        audio.removeEventListener("timeupdate", () => { });
-        audio.removeEventListener("ended", () => { });
+        audio.removeEventListener("timeupdate", () => {});
+        audio.removeEventListener("ended", () => {});
       };
     }
   }, [handleTranscriptionNext]);
@@ -108,7 +108,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   }, [currentImage, index]);
 
   const handleKey = (event: KeyboardEvent) => {
-    if (event.key === ' ' || event.code === 'Space') {
+    if (event.key === " " || event.code === "Space") {
       // Prevent default action, e.g., scrolling
       event.preventDefault();
       togglePlayPause();
@@ -136,10 +136,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       <div className="flex items-center justify-center mt-4 space-x-6">
         <div className="flex gap-3">
           <button
-            className={`flex-1 flex justify-center p-2 rounded-full ${index === 0
+            className={`flex-1 flex justify-center p-2 rounded-full ${
+              index === 0
                 ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                 : "bg-gray-500 text-white hover:bg-gray-400"
-              }`}
+            }`}
             onClick={handleTranscriptionPrev}
             disabled={index === 0}
           >
@@ -159,11 +160,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
             <FaStop />
           </button>
           <button
-            className={`flex justify-center p-2 rounded-full ${index === currentImage.transcriptions.length - 1 ||
-                currentImage.transcriptions.length === 0
+            className={`flex justify-center p-2 rounded-full ${
+              index === currentImage.transcriptions.length - 1 ||
+              currentImage.transcriptions.length === 0
                 ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                 : "bg-gray-500 text-white hover:bg-gray-400"
-              }`}
+            }`}
             onClick={handleTranscriptionNext}
             disabled={
               index === currentImage.transcriptions.length - 1 ||
