@@ -190,6 +190,9 @@ const CollectionView: React.FC<CollectionViewProps> = ({ collection }) => {
                 onClick={handlePhotoClick}
               />
             </div>
+            <span className="fixed left-1/2 transform -translate-x-1/2 top-20 bg-gray-12/90 px-3 py-1 rounded-3xl">
+              page: {currentImageIndex + 1}/{translatedImages.length}
+            </span>
             <div className="fixed bottom-0 left-0 w-full px-4 py-1 text-center bg-gray-1/30 backdrop-blur-lg">
               <Container>
                 <div className="rounded-md bg-gray-12 p-2">
