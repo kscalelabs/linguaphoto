@@ -7,6 +7,7 @@ import { LoadingProvider } from "contexts/LoadingContext";
 import { SocketProvider } from "contexts/SocketContext";
 import { AlertQueue, AlertQueueProvider } from "hooks/alerts";
 import { ThemeProvider } from "hooks/theme";
+import APIKeyPage from "pages/Apikey";
 import CollectionPage from "pages/Collection";
 import Collections from "pages/Collections";
 import Home from "pages/Home";
@@ -67,6 +68,15 @@ const App = () => {
                         element={
                           <PrivateRoute
                             element={<SubscriptionCancelPage />}
+                            requiredSubscription={true} // Set true if subscription is required for this route
+                          />
+                        }
+                      />
+                      <Route
+                        path="/api-key"
+                        element={
+                          <PrivateRoute
+                            element={<APIKeyPage />}
                             requiredSubscription={true} // Set true if subscription is required for this route
                           />
                         }

@@ -55,12 +55,32 @@ async def get_current_user_id(token: str = Depends(oauth2_schema)) -> str:
     return user_id
 
 
+# Dependency to get token and compare with api_key
+async def get_current_user_id_by_api_key(api_key: str = Depends(oauth2_schema), user_crud: UserCrud = Depends()) -> str:
+    async with user_crud:
+        user = await user_crud.get_user_by_api_key(api_key)
+        if user is None:
+            raise HTTPException(status_code=422, detail="Could not validate credentials")
+        return user.id
+
+
 async def subscription_validate(token: str = Depends(oauth2_schema), user_crud: UserCrud = Depends()) -> bool:
     user_id = decode_access_token(token)
     if user_id is None:
         raise HTTPException(status_code=422, detail="Could not validate credentials")
     async with user_crud:
         user = await user_crud.get_user(user_id, True)
+    if user is None:
+        raise HTTPException(status_code=422, detail="Could not validate credentials")
+    if user.is_subscription is False:
+        raise HTTPException(status_code=422, detail="You need to subscribe.")
+    return True
+
+
+async def subscription_validate_by_api_key(
+    api_key: str = Depends(oauth2_schema), user_crud: UserCrud = Depends()
+) -> bool:
+    user = await user_crud.get_user_by_api_key(api_key)
     if user is None:
         raise HTTPException(status_code=422, detail="Could not validate credentials")
     if user.is_subscription is False:

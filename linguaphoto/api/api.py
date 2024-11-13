@@ -14,7 +14,7 @@ to handle routing for the entire API.
 
 from fastapi import APIRouter
 
-from linguaphoto.api import collection, image, subscription, user
+from linguaphoto.api import apikey, collection, image, subscription, user
 
 # Create a new API router
 router = APIRouter()
@@ -24,6 +24,7 @@ router.include_router(user.router, prefix="/user")
 router.include_router(collection.router, prefix="/collection")
 router.include_router(image.router, prefix="/image")
 router.include_router(subscription.router, prefix="/subscription")
+router.include_router(apikey.router, prefix="/api-key")
 
 
 # Define a root endpoint that returns a simple message
