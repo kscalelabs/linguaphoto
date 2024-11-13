@@ -1,6 +1,6 @@
 """Models!"""
 
-from typing import List, Self
+from typing import List, Optional, Self
 from uuid import uuid4
 
 from bcrypt import checkpw, gensalt, hashpw
@@ -33,6 +33,7 @@ class User(LinguaBaseModel):
     email: str
     password_hash: str
     is_subscription: bool
+    api_key: Optional[str] = None
 
     @classmethod
     def create(cls, user: UserSignupFragment) -> Self:

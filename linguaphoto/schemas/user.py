@@ -29,3 +29,4 @@ class UserSigninRespondFragment(BaseModel):
     email: EmailStr
     is_subscription: bool
     is_auth: bool
+    api_key: str

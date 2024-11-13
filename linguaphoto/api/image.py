@@ -10,7 +10,12 @@ from linguaphoto.crud.image import ImageCrud
 from linguaphoto.models import Image
 from linguaphoto.schemas.image import ImageTranslateFragment
 from linguaphoto.socket_manager import notify_user
-from linguaphoto.utils.auth import get_current_user_id, subscription_validate
+from linguaphoto.utils.auth import (
+    get_current_user_id,
+    get_current_user_id_by_api_key,
+    subscription_validate,
+    subscription_validate_by_api_key,
+)
 
 router = APIRouter()
 translating_images: List[str] = []
@@ -31,6 +36,23 @@ async def upload_image(
     id: Annotated[str, Form()] = "",
     user_id: str = Depends(get_current_user_id),
     is_subscribed: bool = Depends(subscription_validate),
+    image_crud: ImageCrud = Depends(),
+) -> Image:
+    """Upload Image and create new Image."""
+    async with image_crud:
+        image = await image_crud.create_image(file, user_id, id)
+        if image:
+            # Run translate in the background
+            asyncio.create_task(translate_background(image.id, image_crud, user_id))
+        return image
+
+
+@router.post("/upload_by_api_key", response_model=Image)
+async def upload_image_by_api_key(
+    file: UploadFile = File(...),
+    id: Annotated[str, Form()] = "",
+    user_id: str = Depends(get_current_user_id_by_api_key),
+    is_subscribed: bool = Depends(subscription_validate_by_api_key),
     image_crud: ImageCrud = Depends(),
 ) -> Image:
     """Upload Image and create new Image."""

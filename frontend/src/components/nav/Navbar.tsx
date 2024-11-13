@@ -14,6 +14,7 @@ const Navbar = () => {
   const navItems = [
     { name: "My Collections", path: "/collections", isExternal: false },
     { name: "Subscription", path: "/subscription", isExternal: false },
+    { name: "API key", path: "/api-key", isExternal: false },
   ];
 
   return (

@@ -12,7 +12,7 @@ from linguaphoto.schemas.collection import (
     CollectionPublishFragment,
     FeaturedImageFragnment,
 )
-from linguaphoto.utils.auth import get_current_user_id
+from linguaphoto.utils.auth import get_current_user_id, get_current_user_id_by_api_key
 
 router = APIRouter()
 
@@ -49,6 +49,16 @@ async def getcollection(id: str, collection_crud: CollectionCrud = Depends()) ->
 async def getcollections(
     user_id: str = Depends(get_current_user_id), collection_crud: CollectionCrud = Depends()
 ) -> List[Collection]:
+    async with collection_crud:
+        collections = await collection_crud.get_collections(user_id=user_id)
+        return collections
+
+
+@router.get("/get_all_api_key", response_model=List[Collection])
+async def getcollection_api_key(
+    user_id: str = Depends(get_current_user_id_by_api_key), collection_crud: CollectionCrud = Depends()
+) -> List[Collection]:
+    print(user_id)
     async with collection_crud:
         collections = await collection_crud.get_collections(user_id=user_id)
         return collections

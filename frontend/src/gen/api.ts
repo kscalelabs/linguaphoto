@@ -206,6 +206,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api-key/generate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["generate_api_key"];
+    put?: never;
+    /** Login User */
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/user/me": {
     parameters: {
       query?: never;
@@ -400,6 +417,9 @@ export interface components {
     SubscriptionResponse: {
       success: boolean;
       error: string;
+    };
+    APIkeyResponse: {
+      api_key: string;
     };
     /** GithubAuthResponse */
     GithubAuthResponse: {
@@ -690,6 +710,7 @@ export interface components {
       email: string;
       is_subscription: boolean;
       is_auth: boolean;
+      api_key: string;
     };
     /**
      * UserPublic
@@ -1362,6 +1383,35 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SubscriptionResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  generate_api_key: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["APIkeyResponse"];
         };
       };
       /** @description Validation Error */
